@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -39,12 +38,12 @@ public class CardDownload {
         return cards;
     }
 
-    public static void downloadAllInList(List<Card> cards, Predicate<Card> pred) throws IOException {
+    public static void downloadAll(List<Card> cards) throws IOException {
+        downloadAllConditioned(cards, (a) -> true);
+    }
+
+    public static void downloadAllConditioned(List<Card> cards, Predicate<Card> pred) throws IOException {
         String cardURLStarter = "https://art.hearthstonejson.com/v1/render/latest/enUS/512x/";
-
-
-        File file = new File(Util.READTXT_FILEPATH);
-        Scanner scanner = new Scanner(file, StandardCharsets.UTF_8);
 
         for (Card card : cards.stream().filter(pred).toList()) {
             URL url = new URL(cardURLStarter + card.getId() + ".png" );
@@ -64,9 +63,7 @@ public class CardDownload {
                     Files.copy(in, Paths.get(path.toString()));
                 }
             }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
+            catch (FileNotFoundException ignored) {}
         }
     }
 }

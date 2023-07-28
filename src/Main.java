@@ -1,7 +1,10 @@
 import util.Card;
-import util.PredsUtil;
+import util.CardDownload;
 
 import java.io.IOException;
+import java.util.function.Predicate;
+
+import static util.PredsUtil.*;
 
 public class Main {
 
@@ -10,10 +13,9 @@ public class Main {
      public static void main(String[] args) throws IOException {
           Card.initializeCardList();
 
-          for (Card card : Card.cardList.stream().filter(PredsUtil.IS_PUZZLE).toList()) {
-               System.out.println(card);
-          }
+          Predicate<Card> condition = not(allTrue(IS_MERCENARY, IS_LOOT_CARD, IS_PUZZLE));
 
+          CardDownload.downloadAllConditioned(Card.cardList, condition);
      }
 
 

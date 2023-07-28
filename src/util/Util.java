@@ -1,7 +1,5 @@
 package util;
 
-import values.CardSet;
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -13,11 +11,6 @@ import java.util.stream.Stream;
 public class Util {
     public static final String READTXT_FILEPATH = "/Users/drew/Desktop/Hearthstone.txt";
     public static final String CARD_FOLDER_FILEPATH = "/Users/drew/Desktop/Hearthstone Cards";
-
-
-    public static final CardSet[] MERCENARY_SETS = new CardSet[]{
-            CardSet.LETTUCE,
-    };
 
     public static String trimChar(String str, int num) {
         return new StringBuffer(str).deleteCharAt(str.length() - num).toString();
@@ -99,9 +92,15 @@ public class Util {
             return;
 
         BufferedImage newImg = image.getSubimage(x, y, w, h);
+        try {
+            file.delete();
+            ImageIO.write(newImg, "png", file);
+        }
+        catch (IOException e) {
+            System.out.println(file.getPath());
+            throw new IOException("");
+        }
 
-        file.delete();
-        ImageIO.write(newImg, "png", file);
     }
 
     /**
