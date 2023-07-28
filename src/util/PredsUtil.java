@@ -3,6 +3,7 @@ package util;
 import java.util.function.Predicate;
 
 public class PredsUtil {
+    public static final Predicate<Card> ALWAYS_TRUE = (card) -> true;
     public static final Predicate<Card> IS_MERCENARY = Card::isMercenaries;
     public static final Predicate<Card> IS_LOOT_CARD = Card::isSingleLoot;
     public static final Predicate<Card> IS_PUZZLE = Card::isPuzzleLab;

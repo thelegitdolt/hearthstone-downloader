@@ -16,8 +16,7 @@ public class CardDownload {
     public static final String TXT_TO_READ = "/Users/drew/Desktop/Hearthstone.txt";
     public static final String CARD_FOLDER_PATHNAME = "/Users/drew/Desktop/Hearthstone.txt";
     public static final String SOURCE_API_URL = "https://art.hearthstonejson.com/v1/render/latest/enUS/512x/";
-    public static List<Card> processAllCards(String path) throws FileNotFoundException {
-
+    public static List<Card> processAllCards(String path, Predicate<Card> pred) throws FileNotFoundException {
         Scanner file = new Scanner(new File(path));
         List<Card> cards = new ArrayList<>();
 
@@ -26,7 +25,7 @@ public class CardDownload {
             String nextLine = file.nextLine();
             if ((nextLine.contains("}") || nextLine.contains("{"))) {
                 Card card = newCard.build();
-                if (!card.equals(Card.NULL_CARD)) {
+                if (!card.equals(Card.NULL_CARD) && pred.test(card)) {
                     cards.add(card);
                 }
                 newCard = Card.Builder.template();
@@ -40,14 +39,15 @@ public class CardDownload {
     }
 
     public static void downloadAll(List<Card> cards) throws IOException {
-        downloadAllConditioned(cards, (a) -> true);
+        downloadAllConditioned(cards, PredsUtil.ALWAYS_TRUE);
     }
 
     public static void downloadAllConditioned(List<Card> cards, Predicate<Card> pred) throws IOException {
         List<Card> queue = cards.stream().filter(pred).toList();
 
-        System.out.println("Card download started! Downloading a total of " + queue.size() + " cards.");
+        System.out.println("Card download started! Queueing up  " + queue.size() + " cards for download.");
 
+        int error = 0;
         for (Card card : queue) {
             URL url = new URL(SOURCE_API_URL + card.getId() + ".png" );
 
@@ -75,10 +75,13 @@ public class CardDownload {
                     Files.copy(in, Paths.get(path.toString()));
                 }
             }
-            catch (FileNotFoundException ignored) {}
+            catch (FileNotFoundException e) {
+                error++;
+            }
 
             if (queue.indexOf(card) % 1000 == 0)
                 System.out.println(queue.indexOf(card));
         }
+        System.out.println("Card download finished! Did not download " + error + " cards as their information could not be retreved.");
     }
 }

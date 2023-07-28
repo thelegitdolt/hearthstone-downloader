@@ -10,6 +10,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 import static util.CardDownload.CARD_FOLDER_PATHNAME;
 
@@ -148,7 +149,11 @@ public class Card {
     }
 
     public static void initializeCardList() throws FileNotFoundException {
-        cardList = CardDownload.processAllCards(CARD_FOLDER_PATHNAME);
+        initializeCardList(PredsUtil.ALWAYS_TRUE);
+    }
+
+    public static void initializeCardList(Predicate<Card> preds) throws FileNotFoundException {
+        cardList = CardDownload.processAllCards(CARD_FOLDER_PATHNAME, preds);
     }
 
 
