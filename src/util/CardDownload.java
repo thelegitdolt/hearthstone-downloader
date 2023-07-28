@@ -15,6 +15,7 @@ import java.util.function.Predicate;
 public class CardDownload {
     public static final String TXT_TO_READ = "/Users/drew/Desktop/Hearthstone.txt";
     public static final String CARD_FOLDER_PATHNAME = "/Users/drew/Desktop/Hearthstone.txt";
+    public static final String SOURCE_API_URL = "https://art.hearthstonejson.com/v1/render/latest/enUS/512x/";
     public static List<Card> processAllCards(String path) throws FileNotFoundException {
 
         Scanner file = new Scanner(new File(path));
@@ -43,10 +44,12 @@ public class CardDownload {
     }
 
     public static void downloadAllConditioned(List<Card> cards, Predicate<Card> pred) throws IOException {
-        String cardURLStarter = "https://art.hearthstonejson.com/v1/render/latest/enUS/512x/";
+        List<Card> queue = cards.stream().filter(pred).toList();
 
-        for (Card card : cards.stream().filter(pred).toList()) {
-            URL url = new URL(cardURLStarter + card.getId() + ".png" );
+        System.out.println("Card download started! Downloading a total of " + queue.size() + " cards.");
+
+        for (Card card : queue) {
+            URL url = new URL(SOURCE_API_URL + card.getId() + ".png" );
 
             StringBuilder path = new StringBuilder(Util.CARD_FOLDER_FILEPATH + "/" + card.getName());
             try {
@@ -58,12 +61,24 @@ public class CardDownload {
                         newPath += (" " + i);
                         i++;
                     }
-                    path = new StringBuilder(newPath);
+
+                    if (card.isCollectible()) {
+                        File original = new File(path.toString());
+                        original.renameTo(new File(newPath + ".png"));
+                    }
+                    else {
+                        path = new StringBuilder(newPath);
+                    }
+
+
                     path.append(".png");
                     Files.copy(in, Paths.get(path.toString()));
                 }
             }
             catch (FileNotFoundException ignored) {}
+
+            if (queue.indexOf(card) % 1000 == 0)
+                System.out.println(queue.indexOf(card));
         }
     }
 }
