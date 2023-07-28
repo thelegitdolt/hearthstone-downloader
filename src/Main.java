@@ -13,7 +13,7 @@ public class Main {
      public static void main(String[] args) throws IOException {
           Card.initializeCardList();
 
-          Predicate<Card> condition = not(allTrue(IS_MERCENARY, IS_LOOT_CARD, IS_PUZZLE));
+          Predicate<Card> condition = not(oneTrue(IS_MERCENARY, IS_LOOT_CARD, IS_PUZZLE));
 
           CardDownload.downloadAllConditioned(Card.cardList, condition);
      }

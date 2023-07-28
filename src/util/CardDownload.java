@@ -51,14 +51,14 @@ public class CardDownload {
             StringBuilder path = new StringBuilder(Util.CARD_FOLDER_FILEPATH + "/" + card.getName());
             try {
                 try (InputStream in = url.openStream()) {
-                    Integer i = 2;
-                    StringBuilder newPath = path;
+                    int i = 2;
+                    String newPath = path.toString();
                     while (new File(newPath + ".png").exists()) {
-                        newPath = path;
-                        newPath.append(" ").append(i);
+                        newPath = path.toString();
+                        newPath += (" " + i);
                         i++;
                     }
-                    path = newPath;
+                    path = new StringBuilder(newPath);
                     path.append(".png");
                     Files.copy(in, Paths.get(path.toString()));
                 }

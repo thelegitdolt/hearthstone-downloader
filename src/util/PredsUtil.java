@@ -26,6 +26,17 @@ public class PredsUtil {
         };
     }
 
+    @SafeVarargs
+    public static <T> Predicate<T> oneTrue(Predicate<T>... preds) {
+        return (T t) -> {
+            for (Predicate<T> pred : preds) {
+                if (pred.test(t))
+                    return true;
+            }
+            return false;
+        };
+    }
+
 
     public static <T> Predicate<T> or(Predicate<T> a, Predicate<T> b){
         return (T t) -> a.test(t) || b.test(t);
