@@ -42,13 +42,13 @@ public class Util {
      * @param path - the path of the file, as a String
      * @param action - the action to undertake
      */
-    public static void mapToDirectory(String path, Lambdas.FileConsumer action) {
-        mapToDirectory(new File(path), action);
+    public static void mapDir(String path, Lambdas.FileConsumer action) {
+        mapDir(new File(path), action);
     }
 
-    public static void mapToPixels(BufferedImage img, Lambdas.TriConsumer<BufferedImage, Integer, Integer> action) {
+    public static void mapPixels(BufferedImage img, Lambdas.TriConsumer<BufferedImage, Integer, Integer> action) {
         for (int x = 0; x < img.getWidth(); x ++) {
-            for (int y = 0; x < img.getHeight(); y++) {
+            for (int y = 0; y < img.getHeight(); y++) {
                 action.apply(img, x, y);
             }
         }
@@ -59,7 +59,7 @@ public class Util {
      * @param directory - directory, as a File
      * @param action - the action to undertake
      */
-    public static void mapToDirectory(File directory, Lambdas.FileConsumer action) {
+    public static void mapDir(File directory, Lambdas.FileConsumer action) {
         if (!directory.isDirectory())
             return;
 
@@ -103,9 +103,9 @@ public class Util {
     }
 
 
-    public static void trimWithExceptionHandle(File file) {
+    public static void cropIgnoreException(File file) {
         try {
-            trimTransparentOutside(file);
+            cropExtraneous(file);
         }
         catch (Exception ignored) {}
     }
@@ -116,7 +116,7 @@ public class Util {
      * @param file to trim, must be an image
      * @throws IOException if that file is not an image or does not exist
      */
-    public static void trimTransparentOutside(File file) throws IOException {
+    public static void cropExtraneous(File file) throws IOException {
 
             BufferedImage image = ImageIO.read(file);
             int x, y, w, h;
@@ -251,34 +251,37 @@ public class Util {
         return sameImage(ImageIO.read(img1), ImageIO.read(img2));
     }
 
-    public static boolean sameImage(BufferedImage img1, BufferedImage img2) {
-        BufferedImage newRef = img2.getSubimage(0, 0, img2.getWidth() - 1, (img2.getHeight() - 1) / 2);
+    public static boolean sameImage(BufferedImage img1, BufferedImage img2) throws IOException {
+        BufferedImage artApprox = img1.getSubimage(img1.getWidth() / 4, img1.getHeight() / 8, img1.getWidth() / 2, img1.getHeight() * 3 / 8);
 
-        BufferedImage artApprox = getArtImageApprox(img1);
+        BufferedImage newRef = img2.getSubimage(img2.getWidth() / 4, img2.getHeight() / 8, img2.getWidth() / 2, img2.getHeight() * 3 / 8);
 
+        ImageIO.write(artApprox, "png", new File("/Users/drew/Desktop/test.png"));
+        ImageIO.write(newRef, "png", new File("/Users/drew/Desktop/test2.png"));
 
         List<Integer> colors = new ArrayList<>();
 
 
-        mapToPixels(img1, (img, x, y) -> {
+        mapPixels(artApprox, (img, x, y) -> {
             int pixel = img.getRGB(x, y);
-            if (colors.contains(pixel)) {
+            if (!colors.contains(pixel)) {
                 colors.add(pixel);
             }
         });
 
-        List<None> values = new ArrayList<>();
-        int toReach = (img2.getHeight() * img2.getWidth()) / 2;
+        List<None> counter = None.list();
 
-        mapToPixels(img2, (img, x, y) -> {
-            int pixel = img2.getRGB(x, y);
+        int toReach = (newRef.getHeight() * newRef.getWidth()) / 10;
+
+        mapPixels(newRef, (img, x, y) -> {
+            int pixel = img.getRGB(x, y);
 
             if (colors.contains(pixel)) {
-                values.add(None.make());
+                counter.add(None.make());
             }
         });
-        return values.size() >= toReach;
 
+        return counter.size() >= toReach;
     }
 
 
