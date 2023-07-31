@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.function.Predicate;
 
 public class CardDownload {
     public static final String TXT_TO_READ = "/Users/drew/Desktop/Hearthstone.txt";
-    public static final String CARD_FOLDER_PATHNAME = "/Users/drew/Desktop/Hearthstone.txt";
+    public static final String CARD_FOLDER_PATHNAME = "/Users/drew/Desktop/Hearthstone Cards";
     public static final String SOURCE_API_URL = "https://art.hearthstonejson.com/v1/render/latest/enUS/512x/";
     public static List<Card> processAllCards(String path, Predicate<Card> pred) throws FileNotFoundException {
         Scanner file = new Scanner(new File(path));
@@ -56,15 +57,16 @@ public class CardDownload {
                 try (InputStream in = url.openStream()) {
                     int i = 2;
                     String newPath = path.toString();
+                    boolean hasMoved = false;
                     while (new File(newPath + ".png").exists()) {
                         newPath = path.toString();
                         newPath += (" " + i);
                         i++;
+                        hasMoved = true;
                     }
 
-                    if (card.isCollectible()) {
-                        File original = new File(path.toString());
-                        original.renameTo(new File(newPath + ".png"));
+                    if (card.isCollectible() && hasMoved) {
+                        Files.move(Path.of(path + ".png"), Path.of(newPath + ".png"));
                     }
                     else {
                         path = new StringBuilder(newPath);
@@ -82,6 +84,8 @@ public class CardDownload {
             if (queue.indexOf(card) % 1000 == 0)
                 System.out.println(queue.indexOf(card));
         }
-        System.out.println("Card download finished! Did not download " + error + " cards as their information could not be retreved.");
+        System.out.println("Card download finished!");
+        if (error > 0)
+            System.out.println("Did not download " + error + " cards as their information could not be retrieved.");
     }
 }

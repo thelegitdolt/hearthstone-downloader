@@ -16,6 +16,10 @@ public class PredsUtil {
         return (T t) -> a.test(t) && b.test(t);
     }
 
+    public static Predicate<Card> isName(String name) {
+        return (card) -> Util.nullableStrEqual(name, card.getName());
+    }
+
     @SafeVarargs
     public static <T> Predicate<T> allTrue(Predicate<T>... preds) {
         return (T t) -> {

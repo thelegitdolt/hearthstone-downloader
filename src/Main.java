@@ -1,21 +1,14 @@
-import util.Card;
-import util.CardDownload;
+import util.Util;
 
 import java.io.IOException;
-import java.util.function.Predicate;
-
-import static util.PredsUtil.*;
 
 public class Main {
 
 
 
      public static void main(String[] args) throws IOException {
-          Card.initializeCardList();
-
-          Predicate<Card> condition = not(oneTrue(IS_MERCENARY, IS_LOOT_CARD, IS_PUZZLE));
-
-          CardDownload.downloadAllConditioned(Card.cardList, condition);
+          System.out.println(Util.sameImage("/Users/drew/Desktop/Hearthstone Cards/Loot Hoarder.png",
+                  "/Users/drew/Desktop/Hearthstone Cards/Loot Hoarder 3.png"));
      }
 
 

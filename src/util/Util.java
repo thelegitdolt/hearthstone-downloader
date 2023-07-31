@@ -17,7 +17,6 @@ public class Util {
     }
 
 
-
     public static Pair<String, String> extractLine(String entry) {
         entry = entry.substring(2, entry.length() - 1);
         String word = entry.substring(0, entry.indexOf("\""));
@@ -47,6 +46,14 @@ public class Util {
         mapToDirectory(new File(path), action);
     }
 
+    public static void mapToPixels(BufferedImage img, Lambdas.TriConsumer<BufferedImage, Integer, Integer> action) {
+        for (int x = 0; x < img.getWidth(); x ++) {
+            for (int y = 0; x < img.getHeight(); y++) {
+                action.apply(img, x, y);
+            }
+        }
+    }
+
     /**
      * A method that applies an action to all non-directory files in a folder.
      * @param directory - directory, as a File
@@ -59,6 +66,9 @@ public class Util {
         Set<File> files = Stream.of(Objects.requireNonNull(directory.listFiles()))
                 .filter(file -> !file.isDirectory()).collect(Collectors.toSet());
 
+        System.out.println("Queued " + files.size() + " files to process");
+
+        int i = 0;
         for (File file : files) {
             try {
                 action.apply(file);
@@ -66,8 +76,40 @@ public class Util {
             catch (IOException e) {
                 e.printStackTrace();
             }
+            i++;
+            if (i % 500 == 0)
+                System.out.println(i);
         }
     }
+
+    public static boolean nullableStrEqual(String a, String b) {
+        if (a == b)
+            return true;
+        else return a.equals(b);
+    }
+
+    public static boolean nullableStrContains(String a, CharSequence b) {
+        if (a == null)
+            return false;
+        else return a.contains(b);
+    }
+
+
+    public static int nullableStrIndexOf(String a, String b) {
+        if (a == null)
+            return -1;
+        else
+            return a.indexOf(b);
+    }
+
+
+    public static void trimWithExceptionHandle(File file) {
+        try {
+            trimTransparentOutside(file);
+        }
+        catch (Exception ignored) {}
+    }
+
 
     /**
      * Takes a file and trims it so there is no extraneous transparent outer layer.
@@ -75,16 +117,17 @@ public class Util {
      * @throws IOException if that file is not an image or does not exist
      */
     public static void trimTransparentOutside(File file) throws IOException {
-        BufferedImage image = ImageIO.read(file);
-        int x, y, w, h;
-        Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> rect = getPixelLimit(image);
+
+            BufferedImage image = ImageIO.read(file);
+            int x, y, w, h;
+            Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> rect = getPixelLimit(image);
 
 
 
-        x = rect.getFirst().getFirst();
-        y = rect.getSecond().getFirst();
-        w = rect.getFirst().getSecond() - rect.getFirst().getFirst();
-        h = rect.getSecond().getSecond() - rect.getSecond().getFirst();
+            x = rect.getFirst().getFirst();
+            y = rect.getSecond().getFirst();
+            w = rect.getFirst().getSecond() - rect.getFirst().getFirst();
+            h = rect.getSecond().getSecond() - rect.getSecond().getFirst();
 
         if (x < 0 || y < 0)
             return;
@@ -198,6 +241,64 @@ public class Util {
             number += list.get(i) * Math.pow(10, i);
         }
         return number;
+    }
+
+    public static boolean sameImage(String img1, String img2) throws IOException {
+        return sameImage(new File(img1), new File(img2));
+    }
+
+    public static boolean sameImage(File img1, File img2) throws IOException {
+        return sameImage(ImageIO.read(img1), ImageIO.read(img2));
+    }
+
+    public static boolean sameImage(BufferedImage img1, BufferedImage img2) {
+        BufferedImage newRef = img2.getSubimage(0, 0, img2.getWidth() - 1, (img2.getHeight() - 1) / 2);
+
+        BufferedImage artApprox = getArtImageApprox(img1);
+
+
+        List<Integer> colors = new ArrayList<>();
+
+
+        mapToPixels(img1, (img, x, y) -> {
+            int pixel = img.getRGB(x, y);
+            if (colors.contains(pixel)) {
+                colors.add(pixel);
+            }
+        });
+
+        List<None> values = new ArrayList<>();
+        int toReach = (img2.getHeight() * img2.getWidth()) / 2;
+
+        mapToPixels(img2, (img, x, y) -> {
+            int pixel = img2.getRGB(x, y);
+
+            if (colors.contains(pixel)) {
+                values.add(None.make());
+            }
+        });
+        return values.size() >= toReach;
+
+    }
+
+
+
+
+    private static BufferedImage getArtImageApprox(BufferedImage img) {
+        int x, y, w, h;
+        x = img.getWidth() / 3;
+        y = img.getHeight() / 5;
+        w = img.getWidth() / 3;
+        h = (int) (img.getHeight() / 6.5);
+
+        return img.getSubimage(x, y, w, h);
+    }
+
+    public static final int HERO_POWER_WIDTH = 440;
+    public static final int HERO_POWER_HEIGHT = 656;
+
+    public static boolean isHeroPowerDimensions(BufferedImage card) {
+        return card.getWidth() == HERO_POWER_WIDTH && card.getHeight() == HERO_POWER_HEIGHT;
     }
 
 

@@ -9,4 +9,9 @@ public class Lambdas {
     public interface FileConsumer {
         void apply(File file) throws IOException;
     }
+
+    @FunctionalInterface
+    public interface TriConsumer<A, B, C> {
+        void apply(A a, B b, C c);
+    }
 }
