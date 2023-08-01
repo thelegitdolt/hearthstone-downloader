@@ -4,6 +4,7 @@ import values.CardClass;
 import values.CardSet;
 import values.CardType;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -70,12 +71,30 @@ public class Card {
         return Objects.hash(cardClass, name, text, cost, id, artist, collectible, set, attack, health, type);
     }
 
+    public File getImage() {
+        return new File(Util.CARD_FOLDER_FILEPATH + "/" + name + " " + id + ".png");
+    }
+
+    public static Card cardFromImg(List<Card> cards, File file) {
+        String id = file.getName().substring(file.getName().lastIndexOf(" "));
+        for (Card c : cards) {
+            if (c.id.equals(id))
+                return c;
+        }
+        return null;
+    }
+
     public String getName() {
         return name;
     }
 
     public boolean isMercenaries() {
         return this.getSet() == CardSet.LETTUCE;
+    }
+
+
+    public boolean isEnchantment() {
+        return this.getType() == CardType.ENCHANTMENT;
     }
 
     public boolean isPuzzleLab() {

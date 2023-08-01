@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,47 +42,34 @@ public class CardDownload {
         downloadAllConditioned(cards, PredsUtil.ALWAYS_TRUE);
     }
 
-    public static void downloadAllConditioned(List<Card> cards, Predicate<Card> pred) throws IOException {
-        List<Card> queue = cards.stream().filter(pred).toList();
+    public static void downloadAllConditioned(List<Card> cards, Predicate<Card> cardPred) throws IOException {
+        List<Card> queue = cards.stream().filter(cardPred).toList();
 
-        System.out.println("Card download started! Queueing up  " + queue.size() + " cards for download.");
+        int queueSize = queue.size();
+        System.out.println("Card download started! Queueing up  " + queueSize + " cards for download.");
 
         int error = 0;
+        int percentage = 0;
         for (Card card : queue) {
             URL url = new URL(SOURCE_API_URL + card.getId() + ".png" );
 
-            StringBuilder path = new StringBuilder(Util.CARD_FOLDER_FILEPATH + "/" + card.getName());
             try {
                 try (InputStream in = url.openStream()) {
-                    int i = 2;
-                    String newPath = path.toString();
-                    boolean hasMoved = false;
-                    while (new File(newPath + ".png").exists()) {
-                        newPath = path.toString();
-                        newPath += (" " + i);
-                        i++;
-                        hasMoved = true;
-                    }
+                    String path = Util.CARD_FOLDER_FILEPATH + "/" + card.getName() + " " + card.getId();
 
-                    if (card.isCollectible() && hasMoved) {
-                        Files.move(Path.of(path + ".png"), Path.of(newPath + ".png"));
-                    }
-                    else {
-                        path = new StringBuilder(newPath);
-                    }
-
-
-                    path.append(".png");
-                    Files.copy(in, Paths.get(path.toString()));
+                    Files.copy(in, Paths.get(path));
                 }
             }
             catch (FileNotFoundException e) {
                 error++;
             }
 
-            if (queue.indexOf(card) % 1000 == 0)
-                System.out.println(queue.indexOf(card));
+            if (queue.indexOf(card) % (queueSize / 100) == 0 ) {
+                percentage++;
+                System.out.println(percentage + "%");
+            }
         }
+
         System.out.println("Card download finished!");
         if (error > 0)
             System.out.println("Did not download " + error + " cards as their information could not be retrieved.");
