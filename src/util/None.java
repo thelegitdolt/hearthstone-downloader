@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * A class that holds no information
- * Intended to be used in lists, as they can be changed even if they are final, so information can be tranfered through lambdas
+ * Intended to be used in lists, as they can be changed even if they are final, so information can be transfered through lambdas
  * This is an incredibly stupid way to go about it
  * @author Dolt
  */
