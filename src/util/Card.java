@@ -11,11 +11,14 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import static util.CardDownload.CARD_FOLDER_PATHNAME;
 
 public class Card {
+    public static final int PLACEHOLDER_GRAY_RGB = -5927560;
+
     private final CardClass cardClass;
     private final String name;
     private final String text;
@@ -45,7 +48,7 @@ public class Card {
         this.health = health;
     }
 
-    public boolean isSingleLoot() {
+    public boolean isLootCard() {
         boolean isCost0 = this.getCost() == 0;
         boolean hasNoArtist = !this.hasArtist();
         boolean hasText = !this.hasText();
@@ -75,13 +78,15 @@ public class Card {
         return new File(Util.CARD_FOLDER_FILEPATH + "/" + name + " " + id + ".png");
     }
 
-    public static Card cardFromImg(List<Card> cards, File file) {
+    public static Optional<Card> cardFromImg(List<Card> cards, File file) {
         String id = file.getName().substring(file.getName().lastIndexOf(" "));
+
+        Card op = null;
         for (Card c : cards) {
             if (c.id.equals(id))
-                return c;
+                op = c;
         }
-        return null;
+        return Optional.ofNullable(op);
     }
 
     public String getName() {

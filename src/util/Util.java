@@ -82,26 +82,6 @@ public class Util {
         }
     }
 
-    public static boolean nullableStrEqual(String a, String b) {
-        if (a == b)
-            return true;
-        else return a.equals(b);
-    }
-
-    public static boolean nullableStrContains(String a, CharSequence b) {
-        if (a == null)
-            return false;
-        else return a.contains(b);
-    }
-
-
-    public static int nullableStrIndexOf(String a, String b) {
-        if (a == null)
-            return -1;
-        else
-            return a.indexOf(b);
-    }
-
 
     public static void cropIgnoreException(File file) {
         try {
@@ -256,8 +236,8 @@ public class Util {
 
         BufferedImage newRef = img2.getSubimage(img2.getWidth() / 4, img2.getHeight() / 8, img2.getWidth() / 2, img2.getHeight() * 3 / 8);
 
-        ImageIO.write(artApprox, "png", new File("/Users/drew/Desktop/test.png"));
-        ImageIO.write(newRef, "png", new File("/Users/drew/Desktop/test2.png"));
+//        ImageIO.write(artApprox, "png", new File("/Users/drew/Desktop/test.png"));
+//        ImageIO.write(newRef, "png", new File("/Users/drew/Desktop/test2.png"));
 
         List<Integer> colors = new ArrayList<>();
 
