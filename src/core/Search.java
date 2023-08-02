@@ -15,8 +15,7 @@ public class Search {
     }
 
     private static void moveFiles(List<Card> toMove) {
-        File searchFolder = new File(FileUtil.SEARCH_FOLDER_FILEPATH);
-        searchFolder.mkdirs();
+        new File(FileUtil.SEARCH_FOLDER_FILEPATH).mkdirs();
         clearFolder();
 
         for (Card card : toMove) {
