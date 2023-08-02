@@ -24,14 +24,14 @@ public class FileUtil {
      * @param directory - directory, as a File
      * @param action - the action to undertake
      */
-    public static void mapDir(File directory, Lambdas.FileConsumer action) {
+    public static void mapDir(File directory, Lambdas.FileConsumer action, boolean print) {
         if (!directory.isDirectory())
             return;
 
         Set<File> files = Stream.of(Objects.requireNonNull(directory.listFiles()))
                 .filter(file -> !file.isDirectory()).collect(Collectors.toSet());
 
-        System.out.println("Queued " + files.size() + " files to process");
+        if (print) System.out.println("Queued " + files.size() + " files to process");
 
         int i = 0;
         for (File file : files) {
@@ -52,8 +52,8 @@ public class FileUtil {
      * @param path - the path of the file, as a String
      * @param action - the action to undertake
      */
-    public static void mapDir(String path, Lambdas.FileConsumer action) {
-        mapDir(new File(path), action);
+    public static void mapDir(String path, Lambdas.FileConsumer action, boolean print) {
+        mapDir(new File(path), action, print);
     }
 
 }

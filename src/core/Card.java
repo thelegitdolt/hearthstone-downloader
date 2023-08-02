@@ -91,11 +91,13 @@ public class Card {
 
     /**
      * Gets the file that this card represents, if you have finished downloading the cards.
-     * @return a File with the pathname of that image.
-     * This image should theoretically always exist, but won't if something stops working.
+     * @return an Optional containing File with the pathname of that image.
+     * If this file does not exist, this optional will contain null instead.
      */
-    public File getImage() {
-        return new File(FileUtil.CARD_FOLDER_FILEPATH + "/" + name + " " + id + ".png");
+    public Optional<File> getImagePath() {
+        File file = new File(FileUtil.CARD_FOLDER_FILEPATH + "/" + name + " " + id + ".png");
+
+        return Optional.ofNullable(file.exists() ? file : null);
     }
 
     /**
