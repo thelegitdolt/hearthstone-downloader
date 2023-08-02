@@ -1,5 +1,7 @@
-package util;
+package core;
 
+import datafixers.Pair;
+import util.*;
 import values.CardClass;
 import values.CardSet;
 import values.CardType;
@@ -14,7 +16,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import static util.CardDownload.TXT_TO_READ;
+import static core.CardDownload.TXT_TO_READ;
 
 public class Card {
     public static final int PLACEHOLDER_GRAY_RGB = -5927560;
@@ -75,7 +77,7 @@ public class Card {
     }
 
     public File getImage() {
-        return new File(Util.CARD_FOLDER_FILEPATH + "/" + name + " " + id + ".png");
+        return new File(FileUtil.CARD_FOLDER_FILEPATH + "/" + name + " " + id + ".png");
     }
 
     public static Optional<Card> lookup(File file) {
@@ -271,7 +273,7 @@ public class Card {
         }
 
         public void fillFromMap(String map) {
-            fillFromMap(Objects.requireNonNull(Util.extractLine(map)));
+            fillFromMap(Objects.requireNonNull(HSStringUtil.extractLine(map)));
         }
 
         public void fillFromMap(Pair<String, String> map) {

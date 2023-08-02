@@ -1,4 +1,4 @@
-package util;
+package datafixers;
 
 public class Pair<F, S> {
     private F f;

@@ -1,4 +1,7 @@
-package util;
+package core;
+
+import util.FileUtil;
+import util.PredsUtil;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -57,7 +60,7 @@ public class CardDownload {
 
             try {
                 try (InputStream in = url.openStream()) {
-                    String path = Util.CARD_FOLDER_FILEPATH + "/" + card.getName() + " " + card.getId() + ".png";
+                    String path = FileUtil.CARD_FOLDER_FILEPATH + "/" + card.getName() + " " + card.getId() + ".png";
 
                     Files.copy(in, Paths.get(path));
                 }

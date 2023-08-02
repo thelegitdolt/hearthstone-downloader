@@ -1,5 +1,7 @@
 package util;
 
+import core.Card;
+
 import java.util.function.Predicate;
 
 /**

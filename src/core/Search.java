@@ -1,4 +1,6 @@
-package util;
+package core;
+
+import util.FileUtil;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -8,13 +10,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-public class SearchUtil {
+public class Search {
     public static void search(Predicate<Card> criteria) {
         moveFiles(Card.cardList.stream().filter(criteria).toList());
     }
 
     private static void moveFiles(List<Card> toMove) {
-        Util.mapDir(Util.SEARCH_FOLDER_FILEPATH, File::delete);
+        FileUtil.mapDir(FileUtil.SEARCH_FOLDER_FILEPATH, File::delete);
 
         for (Card card : toMove) {
             BufferedImage img = null;
@@ -26,7 +28,7 @@ public class SearchUtil {
             Objects.requireNonNull(img);
 
             try {
-                ImageIO.write(img, "png", new File(Util.SEARCH_FOLDER_FILEPATH + "/" + card.getName() + " " + card.getId() + ".png"));
+                ImageIO.write(img, "png", new File(FileUtil.SEARCH_FOLDER_FILEPATH + "/" + card.getName() + " " + card.getId() + ".png"));
             }
             catch (IOException ignored) {}
         }
