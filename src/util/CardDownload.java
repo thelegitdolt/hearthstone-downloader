@@ -13,7 +13,7 @@ import java.util.Scanner;
 import java.util.function.Predicate;
 
 public class CardDownload {
-    public static final String TXT_TO_READ = "/Users/drew/Desktop/Hearthstone.txt";
+    public static final String TXT_TO_READ = "/Users/drew/Desktop/Hearthstone.json";
     public static final String CARD_FOLDER_PATHNAME = "/Users/drew/Desktop/Hearthstone Cards";
     public static final String SOURCE_API_URL = "https://art.hearthstonejson.com/v1/render/latest/enUS/512x/";
     public static List<Card> processAllCards(String path, Predicate<Card> pred) throws FileNotFoundException {
@@ -23,7 +23,9 @@ public class CardDownload {
         Card.Builder newCard = Card.Builder.template();
         while (file.hasNextLine()) {
             String nextLine = file.nextLine();
-            if ((nextLine.contains("}") || nextLine.contains("{"))) {
+            if (nextLine.equals("[") || nextLine.equals("]"))
+                continue;
+            if ((nextLine.charAt(0) != '\t')) {
                 Card card = newCard.build();
                 if (!card.equals(Card.NULL_CARD) && pred.test(card)) {
                     cards.add(card);
@@ -55,7 +57,7 @@ public class CardDownload {
 
             try {
                 try (InputStream in = url.openStream()) {
-                    String path = Util.CARD_FOLDER_FILEPATH + "/" + card.getName() + " " + card.getId();
+                    String path = Util.CARD_FOLDER_FILEPATH + "/" + card.getName() + " " + card.getId() + ".png";
 
                     Files.copy(in, Paths.get(path));
                 }
@@ -65,8 +67,8 @@ public class CardDownload {
             }
 
             if (queue.indexOf(card) % (queueSize / 100) == 0 ) {
-                percentage++;
                 System.out.println(percentage + "%");
+                percentage++;
             }
         }
 

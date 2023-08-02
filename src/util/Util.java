@@ -9,11 +9,21 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Util {
-    public static final String READTXT_FILEPATH = "/Users/drew/Desktop/Hearthstone.txt";
+    public static final String READTXT_FILEPATH = "/Users/drew/Desktop/hearthstone.json";
     public static final String CARD_FOLDER_FILEPATH = "/Users/drew/Desktop/Hearthstone Cards";
+    public static final String SEARCH_FOLDER_FILEPATH = "/Users/drew/Desktop/Hearthstone Search Results";
 
     public static String trimChar(String str, int num) {
         return new StringBuffer(str).deleteCharAt(str.length() - num).toString();
+    }
+
+    public static String idFromFile(String str) {
+        return str.substring(str.lastIndexOf(" ") + 1, str.length() - 4);
+    }
+
+
+    public static String idFromFile(File file) {
+        return idFromFile(file.getName());
     }
 
 
@@ -276,14 +286,6 @@ public class Util {
 
         return img.getSubimage(x, y, w, h);
     }
-
-    public static final int HERO_POWER_WIDTH = 440;
-    public static final int HERO_POWER_HEIGHT = 656;
-
-    public static boolean isHeroPowerDimensions(BufferedImage card) {
-        return card.getWidth() == HERO_POWER_WIDTH && card.getHeight() == HERO_POWER_HEIGHT;
-    }
-
 
 }
 

@@ -12,7 +12,10 @@ public class NullStringUtil {
     public static boolean equals(String a, String b) {
         if (a == b)
             return true;
-        else return a.equals(b);
+        else if (Boolean.logicalXor(a == null, b == null))
+            return false;
+        else
+            return a.equals(b);
     }
 
     /**

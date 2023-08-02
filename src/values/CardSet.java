@@ -8,6 +8,7 @@ public enum CardSet {
     HOF,
     MISSIONS,
     DEMO,
+    PLACEHOLDER_202204,
     NONE,
     CHEAT,
     BLANK,

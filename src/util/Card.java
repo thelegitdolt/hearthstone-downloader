@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import static util.CardDownload.CARD_FOLDER_PATHNAME;
+import static util.CardDownload.TXT_TO_READ;
 
 public class Card {
     public static final int PLACEHOLDER_GRAY_RGB = -5927560;
@@ -78,12 +78,14 @@ public class Card {
         return new File(Util.CARD_FOLDER_FILEPATH + "/" + name + " " + id + ".png");
     }
 
-    public static Optional<Card> cardFromImg(List<Card> cards, File file) {
-        String id = file.getName().substring(file.getName().lastIndexOf(" "));
+    public static Optional<Card> lookup(File file) {
+        return lookup(Util.idFromFile(file));
+    }
 
+    public static Optional<Card> lookup(String id) {
         Card op = null;
-        for (Card c : cards) {
-            if (c.id.equals(id))
+        for (Card c : cardList) {
+            if (NullStringUtil.equals(c.id, id))
                 op = c;
         }
         return Optional.ofNullable(op);
@@ -177,7 +179,7 @@ public class Card {
     }
 
     public static void initializeCardList(Predicate<Card> preds) throws FileNotFoundException {
-        cardList = CardDownload.processAllCards(CARD_FOLDER_PATHNAME, preds);
+        cardList = CardDownload.processAllCards(TXT_TO_READ, preds);
     }
 
 
@@ -269,7 +271,7 @@ public class Card {
         }
 
         public void fillFromMap(String map) {
-            fillFromMap(Util.extractLine(map));
+            fillFromMap(Objects.requireNonNull(Util.extractLine(map)));
         }
 
         public void fillFromMap(Pair<String, String> map) {
