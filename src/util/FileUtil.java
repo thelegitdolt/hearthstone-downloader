@@ -9,6 +9,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * A util class for methods pertaining to interacting with files and directories
+ * @author Dolt
+ */
 public class FileUtil {
     public static final String READTXT_FILEPATH = "/Users/drew/Desktop/hearthstone.json";
     public static final String CARD_FOLDER_FILEPATH = "/Users/drew/Desktop/Hearthstone Cards";

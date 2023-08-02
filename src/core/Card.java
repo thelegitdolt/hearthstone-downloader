@@ -18,7 +18,15 @@ import java.util.function.Predicate;
 
 import static core.CardDownload.TXT_TO_READ;
 
+/**
+ * A class that represents a single Card. Designed to be converted from the api.hearthstone.com jsons.
+ * @author Dolt
+ */
 public class Card {
+    /**
+     * The rgb value of the placeholder color, for cards that do not have art.
+     *
+     */
     public static final int PLACEHOLDER_GRAY_RGB = -5927560;
 
     private final CardClass cardClass;
@@ -36,7 +44,7 @@ public class Card {
 
     public static final Card NULL_CARD = new Card(null, null, null, Integer.MAX_VALUE, null, null, false, null, Integer.MAX_VALUE, Integer.MAX_VALUE, null);
 
-    public Card(CardClass cardClass, String name, String text, int cost, String id, String artist, boolean collectible, CardSet set, int attack, int health, CardType type) {
+    private Card(CardClass cardClass, String name, String text, int cost, String id, String artist, boolean collectible, CardSet set, int attack, int health, CardType type) {
         this.cardClass = cardClass;
         this.name = name;
         this.text = text;
