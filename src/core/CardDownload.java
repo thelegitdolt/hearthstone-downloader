@@ -15,10 +15,14 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.function.Predicate;
 
+/**
+ * The meat and potatoes of the program.
+ * Methods to extract cards to download from jsons, and then saving all these cards into a computer.
+ * @author Dolt
+ */
 public class CardDownload {
-    public static final String TXT_TO_READ = "/Users/drew/Desktop/Hearthstone.json";
-    public static final String CARD_FOLDER_PATHNAME = "/Users/drew/Desktop/Hearthstone Cards";
-    public static final String SOURCE_API_URL = "https://art.hearthstonejson.com/v1/render/latest/enUS/512x/";
+    private static final String SOURCE_API_URL = "https://art.hearthstonejson.com/v1/render/latest/enUS/512x/";
+
     public static List<Card> processAllCards(String path, Predicate<Card> pred) throws FileNotFoundException {
         Scanner file = new Scanner(new File(path));
         List<Card> cards = new ArrayList<>();
@@ -52,6 +56,7 @@ public class CardDownload {
 
         int queueSize = queue.size();
         System.out.println("Card download started! Queueing up  " + queueSize + " cards for download.");
+        System.out.println("Progress:");
 
         int error = 0;
         int percentage = 0;

@@ -21,6 +21,7 @@ public class Search {
         for (Card card : toMove) {
             BufferedImage img = null;
             try {
+                File file = card.getImage();
                 img = ImageIO.read(card.getImage());
             }
             catch (IOException ignored) {}

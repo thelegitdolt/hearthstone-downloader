@@ -12,12 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ImgUtil {
-    public static final String READTXT_FILEPATH = "/Users/drew/Desktop/hearthstone.json";
-    public static final String CARD_FOLDER_FILEPATH = "/Users/drew/Desktop/Hearthstone Cards";
-    public static final String SEARCH_FOLDER_FILEPATH = "/Users/drew/Desktop/Hearthstone Search Results";
-
-
-
     public static void mapPixels(BufferedImage img, Lambdas.TriConsumer<BufferedImage, Integer, Integer> action) {
         for (int x = 0; x < img.getWidth(); x ++) {
             for (int y = 0; y < img.getHeight(); y++) {
