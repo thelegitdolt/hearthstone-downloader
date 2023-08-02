@@ -20,7 +20,7 @@ import java.util.function.Predicate;
  * Methods to extract cards to download from jsons, and then saving all these cards into a computer.
  * @author Dolt
  */
-public class CardDownload {
+public class HearthstoneDownloader {
     private static final String SOURCE_API_URL = "https://art.hearthstonejson.com/v1/render/latest/enUS/512x/";
 
     public static List<Card> processAllCards(String path, Predicate<Card> pred) throws FileNotFoundException {

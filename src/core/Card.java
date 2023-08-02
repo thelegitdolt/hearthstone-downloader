@@ -246,7 +246,7 @@ public class Card {
      * @throws FileNotFoundException if your FileUtil.CARD_FOLDER_FILEPATH or FileUtil.READTXT_FILEPATH is wrong.
      */
     public static void initializeCardList(Predicate<Card> preds) throws FileNotFoundException {
-        cardList = CardDownload.processAllCards(FileUtil.READTXT_FILEPATH, preds);
+        cardList = HearthstoneDownloader.processAllCards(FileUtil.READTXT_FILEPATH, preds);
     }
 
     /**
