@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -22,6 +23,8 @@ import java.util.function.Predicate;
  */
 public class HearthstoneDownloader {
     private static final String SOURCE_API_URL = "https://art.hearthstonejson.com/v1/render/latest/enUS/512x/";
+    public static final Function<Card, String> DEFAULT_NAME_FUNCTION = card ->
+        FileUtil.CARD_FOLDER_FILEPATH + "/" + card.getName() + " " + card.getId() + ".png";
 
     public static List<Card> processAllCards(String path, Predicate<Card> pred) throws FileNotFoundException {
         Scanner file = new Scanner(new File(path));
@@ -48,10 +51,14 @@ public class HearthstoneDownloader {
     }
 
     public static void downloadAll(List<Card> cards) throws IOException {
-        downloadAllConditioned(cards, PredsUtil.ALWAYS_TRUE);
+        downloadAll(cards, PredsUtil.ALWAYS_TRUE);
     }
 
-    public static void downloadAllConditioned(List<Card> cards, Predicate<Card> cardPred) throws IOException {
+    public static void downloadAll(List<Card> cards, Predicate<Card> cardPred) throws IOException {
+        downloadAll(cards, cardPred, DEFAULT_NAME_FUNCTION);
+    }
+
+    public static void downloadAll(List<Card> cards, Predicate<Card> cardPred, Function<Card, String> nameFunc) throws IOException {
         List<Card> queue = cards.stream().filter(cardPred).toList();
 
         int queueSize = queue.size();
@@ -65,7 +72,7 @@ public class HearthstoneDownloader {
 
             try {
                 try (InputStream in = url.openStream()) {
-                    String path = FileUtil.CARD_FOLDER_FILEPATH + "/" + card.getName() + " " + card.getId() + ".png";
+                    String path = nameFunc.apply(card);
 
                     Files.copy(in, Paths.get(path));
                 }
