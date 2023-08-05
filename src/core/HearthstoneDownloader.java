@@ -23,8 +23,6 @@ import java.util.function.Predicate;
  */
 public class HearthstoneDownloader {
     private static final String SOURCE_API_URL = "https://art.hearthstonejson.com/v1/render/latest/enUS/512x/";
-    public static final Function<Card, String> DEFAULT_NAME_FUNCTION = card ->
-        FileUtil.CARD_FOLDER_FILEPATH + "/" + card.getName() + " " + card.getId() + ".png";
 
     public static List<Card> processAllCards(String path, Predicate<Card> pred) throws FileNotFoundException {
         Scanner file = new Scanner(new File(path));
@@ -55,7 +53,11 @@ public class HearthstoneDownloader {
     }
 
     public static void downloadAll(List<Card> cards, Predicate<Card> cardPred) throws IOException {
-        downloadAll(cards, cardPred, DEFAULT_NAME_FUNCTION);
+        downloadAll(cards, cardPred, Card::toString);
+    }
+
+    public static void downloadAll(List<Card> cards, Function<Card, String> nameFunc) throws IOException {
+        downloadAll(cards, PredsUtil.ALWAYS_TRUE, nameFunc);
     }
 
     public static void downloadAll(List<Card> cards, Predicate<Card> cardPred, Function<Card, String> nameFunc) throws IOException {
@@ -72,7 +74,7 @@ public class HearthstoneDownloader {
 
             try {
                 try (InputStream in = url.openStream()) {
-                    String path = nameFunc.apply(card);
+                    String path = FileUtil.CARD_FOLDER_FILEPATH + "/" + nameFunc.apply(card);
 
                     Files.copy(in, Paths.get(path));
                 }

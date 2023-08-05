@@ -196,12 +196,20 @@ public class Card {
     }
 
     /**
-     * toString implementation, has linebreaks
-     * I'm pretty sure this is not how you're supposed to do this
-     * @return A string containing every field in this card, followed by its value, separated by line breaks
+     * toString implementation
+     * @return string that gives name + " " + id
      */
     @Override
     public String toString() {
+        return this.getName() + " " + this.getId();
+    }
+
+
+    /**
+     * Full information on the card
+     * @return A string containing every field in this card, followed by its value, separated by line breaks
+     */
+    public String describe() {
         StringBuilder str = new StringBuilder();
         for (Field field : this.getClass().getDeclaredFields()) {
             try {
