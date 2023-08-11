@@ -26,4 +26,10 @@ public class Lambdas {
     public interface TriConsumer<A, B, C> {
         void apply(A a, B b, C c);
     }
+
+
+    @FunctionalInterface
+    public interface BiPredicate<A, B> {
+        boolean test(A a, B b);
+    }
 }

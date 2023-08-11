@@ -5,10 +5,12 @@ import datafixers.None;
 import datafixers.Pair;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ImgUtil {
@@ -18,6 +20,54 @@ public class ImgUtil {
                 action.apply(img, x, y);
             }
         }
+    }
+
+
+    /**
+     * Takes an image and returns a list of all possible kernels of size kernelSize on that image
+     *
+     * @param img the image
+     * @param kernelSize the size of the kernel. 2 means 2x2, etc.
+     * @param stopAfterMaxKernel how many kernels to place into list before it stops.
+     * @param startX X cord of the location to start producing kernels at
+     * @param startY y cord of the location to start producing kernels at
+     * @return the list yk
+     */
+    public static List<int[][]> getImageKernelsOf(BufferedImage img, int kernelSize, int stopAfterMaxKernel, int startX, int startY) {
+        List<int[][]> kernels = new ArrayList<>();
+
+        if (kernelSize > img.getWidth() || kernelSize > img.getHeight())
+            throw new IllegalArgumentException("Kernelsize cannot be bigger than the dimension of the image");
+        else if (startX > img.getWidth())
+            throw new IllegalArgumentException("StartX is outside the image");
+        else if (startY > img.getHeight())
+            throw new IllegalArgumentException("StartY is outside the image");
+
+        int kernelAmount = 0;
+        for (int y = 0; y < img.getHeight() - 1 - kernelSize; y++) {
+            for (int x = 0; x < img.getWidth() - 1 - kernelSize; x++) {
+                if (y < startY)
+                    continue;
+                else if (y == startY && x < startX)
+                    continue;
+                else if (isTranparentPixel(img, x, y))
+                    continue;
+
+                kernelAmount++;
+                int[][] singleKernel = new int[kernelSize][kernelSize];
+
+                for (int kernelX = 0; kernelX < kernelSize; kernelX++){
+                    for (int kernelY = 0; kernelY < kernelSize; kernelY++) {
+                        singleKernel[kernelX][kernelY] = img.getRGB(kernelX + x, kernelY + y);
+                    }
+                }
+                kernels.add(singleKernel);
+                if (kernelAmount >= stopAfterMaxKernel)
+                    return kernels;
+            }
+        }
+
+        return kernels;
     }
 
 
@@ -149,8 +199,6 @@ public class ImgUtil {
 
         BufferedImage newRef = img2.getSubimage(img2.getWidth() / 4, img2.getHeight() / 8, img2.getWidth() / 2, img2.getHeight() * 3 / 8);
 
-//        ImageIO.write(artApprox, "png", new File("/Users/drew/Desktop/test.png"));
-//        ImageIO.write(newRef, "png", new File("/Users/drew/Desktop/test2.png"));
 
         List<Integer> colors = new ArrayList<>();
 
@@ -175,6 +223,47 @@ public class ImgUtil {
         });
 
         return counter.size() >= toReach;
+    }
+
+
+
+    public static int[] getRGBs(int rawRGB) {
+        Color color = new Color(rawRGB);
+        return new int[]{
+          color.getRed(), color.getBlue(), color.getGreen()
+        };
+    }
+
+    public static void printAsRGB(int rawRGB) {
+        System.out.println(Arrays.toString(getRGBs(rawRGB)));
+    }
+
+    public static int twoColorDist(int pix1, int pix2) {
+        Color color1 = new Color(pix1);
+        Color color2 = new Color(pix2);
+
+        int red1 = color1.getRed();
+        int blue1 = color1.getBlue();
+        int green1 = color1.getGreen();
+
+        int red2 = color2.getRed();
+        int blue2 = color2.getBlue();
+        int green2 = color2.getGreen();
+
+        return Math.abs(red1 + blue1 + green1 - red2 - blue2 - green2);
+    }
+
+
+
+
+
+    public static void replaceImage(BufferedImage img, String path) throws IOException {
+        File file = new File(path);
+
+        if (file.exists())
+            file.delete();
+
+        ImageIO.write(img, "png", file);
     }
 
 }

@@ -1,10 +1,11 @@
 package util;
 
+import datafixers.Lambdas;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public class Util {
     public static String idFromFile(String str) {
@@ -30,6 +31,25 @@ public class Util {
     }
 
     /**
+     * Guess what this method does!!!!
+     */
+    public static double square(double dubs) {
+        return dubs * dubs;
+    }
+
+    public static <V> Set<Map.Entry<Integer, V>> enumerate(List<V> list) {
+        Map<Integer, V> enumeratedThing = new HashMap<>();
+        for (int i = 0; i < list.size() - 1; i++) {
+            enumeratedThing.put(i, list.get(i));
+        }
+
+        return enumeratedThing.entrySet();
+     }
+
+
+
+
+    /**
      * Takes a list of single-digit numbers and displays them as a number.
      */
     public static int getNumberFromIntList(List<Integer> list) {
@@ -45,7 +65,33 @@ public class Util {
     }
 
 
+    public static boolean deepFitCriteria(int[][] a1, int[][] a2, Lambdas.BiPredicate<Integer, Integer> criteria) {
+        if (a1 == a2)
+            return true;
+        if (a1 == null || a2==null)
+            return false;
+        int length = a1.length;
+        if (a2.length != length)
+            return false;
 
+
+        for (int i = 0; i < length; i++) {
+            int[] e1 = a1[i];
+            int[] e2 = a2[i];
+
+            if (e1 == null)
+                return false;
+
+            int len = e1.length;
+
+            if (len != e2.length)
+                return false;
+
+            for (int j = 0; j < len; j++)
+                if (!criteria.test(e1[j], e2[j])) return false;
+        }
+        return true;
+    }
 
 
 

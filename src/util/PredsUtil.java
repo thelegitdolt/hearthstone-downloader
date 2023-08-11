@@ -9,7 +9,7 @@ import java.util.function.Predicate;
  * @author Dolt
  */
 public class PredsUtil {
-    public static final Predicate<Card> ALWAYS_TRUE = (card) -> true;
+    public static final Predicate<Card> ALWAYS_TRUE = card -> true;
     public static final Predicate<Card> IS_MERCENARY = Card::isMercenaries;
     public static final Predicate<Card> IS_LOOT_CARD = Card::isLootCard;
     public static final Predicate<Card> IS_PUZZLE = Card::isPuzzleLab;
@@ -65,6 +65,21 @@ public class PredsUtil {
                     return true;
             }
             return false;
+        };
+    }
+
+    /**
+     * @param preds as many predicates are you want
+     * @return a new predicate that is true as long as none of preds is true
+     */
+    @SafeVarargs
+    public static <T> Predicate<T> noneTrue(Predicate<T>... preds) {
+        return (T t) -> {
+            for (Predicate<T> pred : preds) {
+                if (pred.test(t))
+                    return false;
+            }
+            return true;
         };
     }
 

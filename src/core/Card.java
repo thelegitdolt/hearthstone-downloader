@@ -5,6 +5,7 @@ import util.*;
 import values.CardClass;
 import values.CardSet;
 import values.CardType;
+import values.Rarity;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,12 +20,16 @@ import java.util.function.Predicate;
  * A class that represents a single Card. Designed to be converted from the api.hearthstone.com jsons.
  * @author Dolt
  */
-public class Card {
+public class Card implements Comparable<Card> {
     /**
      * The rgb value of the placeholder gray color, for cards that do not have art.
      * I don't want any artless cards. This exists so I can filter them out.
      */
     public static final int PLACEHOLDER_GRAY_RGB = -5927560;
+
+    public static final String[] BLACKLIST = new String[]{
+        ""
+    };
 
     private final CardClass cardClass;
     private final String name;
@@ -37,14 +42,15 @@ public class Card {
     private final Integer attack;
     private final Integer health;
     private final CardType type;
+    private final Rarity rarity;
     public static List<Card> cardList = new ArrayList<>();
 
-    public static final Card NULL_CARD = new Card(null, null, null, Integer.MAX_VALUE, null, null, false, null, Integer.MAX_VALUE, Integer.MAX_VALUE, null);
+    public static final Card NULL_CARD = new Card(null, null, null, Integer.MAX_VALUE, null, null, false, null, Integer.MAX_VALUE, Integer.MAX_VALUE, null, null);
 
     /**
      * private constructor; use the Card.Builder instead
      */
-    private Card(CardClass cardClass, String name, String text, int cost, String id, String artist, boolean collectible, CardSet set, int attack, int health, CardType type) {
+    private Card(CardClass cardClass, String name, String text, int cost, String id, String artist, boolean collectible, CardSet set, int attack, int health, CardType type, Rarity rarity) {
         this.cardClass = cardClass;
         this.name = name;
         this.text = text;
@@ -56,6 +62,7 @@ public class Card {
         this.attack = attack;
         this.type = type;
         this.health = health;
+        this.rarity = rarity;
     }
 
     public boolean isLootCard() {
@@ -164,6 +171,8 @@ public class Card {
         return this.getSet() == CardSet.BOOMSDAY && isSpeciallyCallingPuzzle && !this.hasArtist();
     }
 
+
+
     /**
      * @return whether a card has an artist.
      * A card with an artist must have some original art.
@@ -193,6 +202,10 @@ public class Card {
 
     public Integer getCost() {
         return cost;
+    }
+
+    public Rarity getRarity() {
+        return rarity;
     }
 
     /**
@@ -257,12 +270,41 @@ public class Card {
         cardList = HearthstoneDownloader.processAllCards(FileUtil.READTXT_FILEPATH, preds);
     }
 
+    public static void initializeSortedCardList(Predicate<Card> preds) throws FileNotFoundException {
+        cardList = HearthstoneDownloader.processAllCards(FileUtil.READTXT_FILEPATH, preds).stream().sorted().toList();
+    }
+
+
+    public static void initializeSortedCardList() throws FileNotFoundException {
+        initializeSortedCardList(PredsUtil.ALWAYS_TRUE);
+    }
+
     /**
      * initializeCardList that will contain all cards by default with no filtering.
      * Done by calling Card.initializeCardList(preds) with a predicate that is always true.
      */
     public static void initializeCardList() throws FileNotFoundException {
         initializeCardList(PredsUtil.ALWAYS_TRUE);
+    }
+
+
+    public static List<File> decideDelete(List<Card> cards) {
+        if (cards.stream().noneMatch(Card::isCollectible)) {
+            return new ArrayList<>();
+        }
+
+
+        return new ArrayList<>();
+    }
+
+    /**
+     * Compares the Name, then ID of cards, alphabetically.
+     * @param o the object to be compared.
+     * @return stuff.
+     */
+    @Override
+    public int compareTo(Card o) {
+        return String.CASE_INSENSITIVE_ORDER.compare(this.toString(), o.toString());
     }
 
 
@@ -282,6 +324,7 @@ public class Card {
         private Integer attack;
         private Integer health;
         private CardType type;
+        private Rarity rarity;
 
         /**
          * A builder with all fields set to null. Any ints are set to Integer.MAX_VALUE, cuz why not
@@ -299,6 +342,7 @@ public class Card {
             this.attack = Integer.MAX_VALUE;
             this.health = Integer.MAX_VALUE;
             this.type = null;
+            this.rarity = null;
         }
 
         public static Builder template() {
@@ -364,12 +408,17 @@ public class Card {
             return this;
         }
 
+        public Card.Builder rarity(Rarity entry) {
+            this.rarity = entry;
+            return this;
+        }
+
 
         /**
          * Build your card after you are done setting everything.
          */
         public Card build() {
-            return new Card(this.cardClass, this.name, this.text, this.cost, this.id, this.artist, this.collectible, this.set, this.attack, this.health, this.type);
+            return new Card(this.cardClass, this.name, this.text, this.cost, this.id, this.artist, this.collectible, this.set, this.attack, this.health, this.type, this.rarity);
         }
 
         public void fillFromMap(String map) {
@@ -394,6 +443,7 @@ public class Card {
                 case "health" -> this.health(Integer.parseInt(value));
                 case "collectible" -> this.collectible(Boolean.parseBoolean(value));
                 case "set" -> this.set(CardSet.valueOf(value));
+                case "rarity" -> this.rarity(Rarity.valueOf(value));
                 case "type" -> this.type(CardType.valueOf(value));
             }
         }
