@@ -6,6 +6,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class Util {
     public static String idFromFile(String str) {
@@ -44,9 +47,24 @@ public class Util {
         }
 
         return enumeratedThing.entrySet();
+    }
+
+
+    public static <E> void removeIfThenApply(List<E> list, Predicate<? super E> criteria, Consumer<E> action) {
+        for (E element : list.stream().filter(criteria).toList()) {
+            action.accept(element);
+        }
+
+        list.removeIf(criteria);
+    }
+
+     public static <K, V> Map<K, V> mapButKeepFirst(List<K> list, Function<? super K, V> mapper) {
+        Map<K, V> map = new HashMap<>();
+        for (K element : list)
+            map.put(element, mapper.apply(element));
+
+        return map;
      }
-
-
 
 
     /**

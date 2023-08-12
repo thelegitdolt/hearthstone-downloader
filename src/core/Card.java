@@ -11,10 +11,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 /**
  * A class that represents a single Card. Designed to be converted from the api.hearthstone.com jsons.
@@ -275,6 +272,7 @@ public class Card implements Comparable<Card> {
     }
 
 
+
     public static void initializeSortedCardList() throws FileNotFoundException {
         initializeSortedCardList(PredsUtil.ALWAYS_TRUE);
     }
@@ -287,14 +285,54 @@ public class Card implements Comparable<Card> {
         initializeCardList(PredsUtil.ALWAYS_TRUE);
     }
 
+    private boolean isMostlyEqual(Card o) {
+        return o.name.equals(name) && o.text.equals(text) && Objects.equals(o.getCost(), cost)
+                && o.attack.equals(attack) && o.health.equals(health) && o.type == type;
+    }
 
     public static List<File> decideDelete(List<Card> cards) {
-        if (cards.stream().noneMatch(Card::isCollectible)) {
-            return new ArrayList<>();
+        List<Card> toReturn = new ArrayList<>();
+
+        // divide all cards into a number of subsets
+        // each subset should have identical names, texts, costs, attacks, healths, card type, and race/spell school
+        List<List<Card>> subsets = new ArrayList<>();
+
+        boolean hasHome = false;
+
+        for (Card card : cards) {
+            for (List<Card> subset : subsets) {
+                if (subset.get(0).isMostlyEqual(card)) {
+                    subset.add(card);
+                    hasHome = true;
+                }
+            }
+            if (hasHome) {
+                hasHome = false;
+                continue;
+            }
+
+            List<Card> newSubSet = new ArrayList<>();
+            newSubSet.add(card);
+            subsets.add(newSubSet);
         }
 
+        // Drop all sets with only uncollectible cards; I will handle these separately
+        subsets.removeIf((list) -> list.stream().noneMatch(Card::isCollectible));
 
-        return new ArrayList<>();
+
+        // from each subset, if there are collectible cards inside, filter out any cards that are not collectible
+        for (List<Card> subset : subsets) {
+            Util.removeIfThenApply(subset, Card::isCollectible, toReturn::add);
+        }
+
+        // if one of the minions is in CardSet.EXPERT1, get rid of all the others.
+        for (List<Card> subset : subsets) {
+            if (subset.stream().anyMatch((card) -> card.set == CardSet.EXPERT1)) {
+                Util.removeIfThenApply(subset, c -> c.getSet() != CardSet.EXPERT1, toReturn::add);
+            }
+        }
+
+        return toReturn.stream().map(card -> card.getImagePath().orElse(null)).filter(Objects::nonNull).toList();
     }
 
     /**
@@ -304,7 +342,7 @@ public class Card implements Comparable<Card> {
      */
     @Override
     public int compareTo(Card o) {
-        return String.CASE_INSENSITIVE_ORDER.compare(this.toString(), o.toString());
+        return String.CASE_INSENSITIVE_ORDER.compare(this.name, o.name);
     }
 
 
@@ -331,18 +369,18 @@ public class Card implements Comparable<Card> {
          * Use Card.Builder.template() instead
          */
         public Builder() {
-            this.cardClass = null;
-            this.name = null;
-            this.text = null;
+            this.cardClass = CardClass.INVALID;
+            this.name = "";
+            this.text = "";
             this.cost = Integer.MAX_VALUE;
-            this.id = null;
-            this.artist = null;
+            this.id = "";
+            this.artist = "";
             this.collectible = false;
-            this.set = null;
+            this.set = CardSet.INVALID;
             this.attack = Integer.MAX_VALUE;
             this.health = Integer.MAX_VALUE;
-            this.type = null;
-            this.rarity = null;
+            this.type = CardType.BLANK;
+            this.rarity = Rarity.INVALID;
         }
 
         public static Builder template() {
