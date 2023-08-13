@@ -17,14 +17,14 @@ import java.util.function.Predicate;
  * A class that represents a single Card. Designed to be converted from the api.hearthstone.com jsons.
  * @author Dolt
  */
-public class Card implements Comparable<Card> {
+public class Card {
     /**
      * The rgb value of the placeholder gray color, for cards that do not have art.
      * I don't want any artless cards. This exists so I can filter them out.
      */
     public static final int PLACEHOLDER_GRAY_RGB = -5927560;
 
-    public static final String[] BLACKLIST = new String[]{
+    public static final String[] BLACKLIST = {
         ""
     };
 
@@ -40,7 +40,6 @@ public class Card implements Comparable<Card> {
     private final Integer health;
     private final CardType type;
     private final Rarity rarity;
-    public static List<Card> cardList = new ArrayList<>();
 
     public static final Card NULL_CARD = new Card(null, null, null, Integer.MAX_VALUE, null, null, false, null, Integer.MAX_VALUE, Integer.MAX_VALUE, null, null);
 
@@ -88,6 +87,8 @@ public class Card implements Comparable<Card> {
         return collectible == card.collectible && cardClass == card.cardClass && Objects.equals(name, card.name) && Objects.equals(text, card.text) && Objects.equals(cost, card.cost) && Objects.equals(id, card.id) && Objects.equals(artist, card.artist) && set == card.set && Objects.equals(attack, card.attack) && Objects.equals(health, card.health) && type == card.type;
     }
 
+
+
     @Override
     public int hashCode() {
         return Objects.hash(cardClass, name, text, cost, id, artist, collectible, set, attack, health, type);
@@ -98,6 +99,7 @@ public class Card implements Comparable<Card> {
      * @return an Optional containing File with the pathname of that image.
      * If this file does not exist, this optional will contain null instead.
      */
+    @RequiresInitializedCardList
     public Optional<File> getImagePath() {
         File file = new File(FileUtil.CARD_FOLDER_FILEPATH + "/" + name + " " + id + ".png");
 
@@ -111,9 +113,10 @@ public class Card implements Comparable<Card> {
      * @param id the id
      * @return Optional<Card> </Card> that contains a card with id "id", if it exists.
      */
+    @RequiresInitializedCardList
     public static Optional<Card> lookup(String id) {
         Card op = null;
-        for (Card c : cardList) {
+        for (Card c : CardList.get()) {
             if (NullStringUtil.equals(c.id, id))
                 op = c;
         }
@@ -257,33 +260,7 @@ public class Card implements Comparable<Card> {
         return text;
     }
 
-    /**
-     * Initializes cardList to have every single hearthstone card in the game.
-     * You MUST run this to do most logic on this card.
-     * @param preds Any cards that do not meet this Predicate will not be included.
-     * @throws FileNotFoundException if your FileUtil.CARD_FOLDER_FILEPATH or FileUtil.READTXT_FILEPATH is wrong.
-     */
-    public static void initializeCardList(Predicate<Card> preds) throws FileNotFoundException {
-        cardList = HearthstoneDownloader.processAllCards(FileUtil.READTXT_FILEPATH, preds);
-    }
 
-    public static void initializeSortedCardList(Predicate<Card> preds) throws FileNotFoundException {
-        cardList = HearthstoneDownloader.processAllCards(FileUtil.READTXT_FILEPATH, preds).stream().sorted().toList();
-    }
-
-
-
-    public static void initializeSortedCardList() throws FileNotFoundException {
-        initializeSortedCardList(PredsUtil.ALWAYS_TRUE);
-    }
-
-    /**
-     * initializeCardList that will contain all cards by default with no filtering.
-     * Done by calling Card.initializeCardList(preds) with a predicate that is always true.
-     */
-    public static void initializeCardList() throws FileNotFoundException {
-        initializeCardList(PredsUtil.ALWAYS_TRUE);
-    }
 
     private boolean isMostlyEqual(Card o) {
         return o.name.equals(name) && o.text.equals(text) && Objects.equals(o.getCost(), cost)
@@ -316,7 +293,7 @@ public class Card implements Comparable<Card> {
             subsets.add(newSubSet);
         }
 
-        // Drop all sets with only uncollectible cards; I will handle these separately
+        // Drop all subsets with only uncollectible cards; I will handle these separately
         subsets.removeIf((list) -> list.stream().noneMatch(Card::isCollectible));
 
 
@@ -331,18 +308,7 @@ public class Card implements Comparable<Card> {
                 Util.removeIfThenApply(subset, c -> c.getSet() != CardSet.EXPERT1, toReturn::add);
             }
         }
-
         return toReturn.stream().map(card -> card.getImagePath().orElse(null)).filter(Objects::nonNull).toList();
-    }
-
-    /**
-     * Compares the Name, then ID of cards, alphabetically.
-     * @param o the object to be compared.
-     * @return stuff.
-     */
-    @Override
-    public int compareTo(Card o) {
-        return String.CASE_INSENSITIVE_ORDER.compare(this.name, o.name);
     }
 
 

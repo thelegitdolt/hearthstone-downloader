@@ -93,4 +93,5 @@ public class HearthstoneDownloader {
         if (error > 0)
             System.out.println("Did not download " + error + " cards as their information could not be retrieved.");
     }
+
 }
