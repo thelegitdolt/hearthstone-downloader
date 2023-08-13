@@ -8,11 +8,10 @@ import values.CardType;
 import values.Rarity;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.function.Predicate;
+
 /**
  * A class that represents a single Card. Designed to be converted from the api.hearthstone.com jsons.
  * @author Dolt
@@ -26,6 +25,7 @@ public class Card {
 
     public static final String[] BLACKLIST = {
         ""
+
     };
 
     private final CardClass cardClass;
@@ -116,7 +116,7 @@ public class Card {
     @RequiresInitializedCardList
     public static Optional<Card> lookup(String id) {
         Card op = null;
-        for (Card c : CardList.get()) {
+        for (Card c : CardList.list()) {
             if (NullStringUtil.equals(c.id, id))
                 op = c;
         }
@@ -299,14 +299,14 @@ public class Card {
 
         // from each subset, if there are collectible cards inside, filter out any cards that are not collectible
         for (List<Card> subset : subsets) {
-            Util.removeIfThenApply(subset, Card::isCollectible, toReturn::add);
+            if (subset.stream().anyMatch(Card::isCollectible))
+                Util.removeIfThenApply(subset, PredsUtil.not(Card::isCollectible), toReturn::add);
         }
 
         // if one of the minions is in CardSet.EXPERT1, get rid of all the others.
         for (List<Card> subset : subsets) {
-            if (subset.stream().anyMatch((card) -> card.set == CardSet.EXPERT1)) {
+            if (subset.stream().anyMatch((card) -> card.set == CardSet.EXPERT1))
                 Util.removeIfThenApply(subset, c -> c.getSet() != CardSet.EXPERT1, toReturn::add);
-            }
         }
         return toReturn.stream().map(card -> card.getImagePath().orElse(null)).filter(Objects::nonNull).toList();
     }

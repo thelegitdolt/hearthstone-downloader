@@ -8,7 +8,6 @@ import java.io.IOException;
  * @author Dolt
  */
 public class Lambdas {
-
     /**
      * A Consumer<File></File> that can throw an IOException
      * Useful, since almost all methods that transform files throw an IOException
@@ -27,7 +26,9 @@ public class Lambdas {
         void apply(A a, B b, C c);
     }
 
-
+    /**
+     * A lambda that returns a true or false value base on two different parameters <A> </A> and <B></B>
+     */
     @FunctionalInterface
     public interface BiPredicate<A, B> {
         boolean test(A a, B b);
