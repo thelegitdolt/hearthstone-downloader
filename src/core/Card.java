@@ -144,7 +144,15 @@ public class Card {
      * @return true if this card is of CardSet.LETTUCE, false if not.
      */
     public boolean isMercenaries() {
-        return this.getSet() == CardSet.LETTUCE;
+        return this.set == CardSet.LETTUCE;
+    }
+
+    public boolean isBattlegrounds() {
+        return this.set == CardSet.BATTLEGROUNDS;
+    }
+
+    public boolean isSoloHero() {
+        return this.type == CardType.HERO && this.cost == Integer.MAX_VALUE;
     }
 
 
@@ -267,6 +275,46 @@ public class Card {
                 && o.attack.equals(attack) && o.health.equals(health) && o.type == type;
     }
 
+    @RequiresInitializedCardList
+    public static void crudeDeleteDupes() {
+        List<Card> withName = new ArrayList<>();
+
+        CardList.forEach((card) -> {
+            if (card.getImagePath().isEmpty()) {
+                return;
+            }
+
+            if ((withName.size() > 0 && !NullStringUtil.equals(card.getName(),  withName.get(0).getName())) ) {
+//                    if (withName.size() > 1 && withName.stream().anyMatch(Card::isCollectible))
+//                         System.out.println(withName.get(0).getName());
+
+                Card.decideDelete(withName).forEach(File::delete);
+                withName.clear();
+            }
+
+            withName.add(card);
+        });
+    }
+
+
+    @RequiresInitializedCardList
+    public static void crudeListDupes() {
+        List<Card> withName = new ArrayList<>();
+
+        CardList.forEach((card) -> {
+            if (card.getImagePath().isEmpty()) {
+                return;
+            }
+
+            if ((withName.size() > 0 && !NullStringUtil.equals(card.getName(),  withName.get(0).getName())) ) {
+                if (withName.size() > 1 && withName.stream().anyMatch(Card::isCollectible))
+                    System.out.println(withName.get(0).getName());
+            }
+
+            withName.add(card);
+        });
+    }
+
     public static List<File> decideDelete(List<Card> cards) {
         List<Card> toReturn = new ArrayList<>();
 
@@ -293,8 +341,13 @@ public class Card {
             subsets.add(newSubSet);
         }
 
+
         // Drop all subsets with only uncollectible cards; I will handle these separately
+        List<List<Card>> uncollectibles = subsets.stream().filter((list) -> list.stream().noneMatch(Card::isCollectible)).toList();
+        decideDeleteUncollectibles(uncollectibles);
+
         subsets.removeIf((list) -> list.stream().noneMatch(Card::isCollectible));
+
 
 
         // from each subset, if there are collectible cards inside, filter out any cards that are not collectible
@@ -303,17 +356,44 @@ public class Card {
                 Util.removeIfThenApply(subset, PredsUtil.not(Card::isCollectible), toReturn::add);
         }
 
-        // if one of the minions is in CardSet.EXPERT1, get rid of all the others.
+        // if one of the minions has "CORE" in its id name, get rid of all the others.
         for (List<Card> subset : subsets) {
-            if (subset.stream().anyMatch((card) -> card.set == CardSet.EXPERT1))
-                Util.removeIfThenApply(subset, c -> c.getSet() != CardSet.EXPERT1, toReturn::add);
+            if (subset.stream().anyMatch(card -> NullStringUtil.contains(card.id, "CORE_")))
+                Util.removeIfThenApply(subset, c -> NullStringUtil.contains(c.id, "CORE_"), toReturn::add);
         }
         return toReturn.stream().map(card -> card.getImagePath().orElse(null)).filter(Objects::nonNull).toList();
     }
 
+    private static void decideDeleteUncollectibles(List<List<Card>> subsets) {
+        // first of all, if any these subsets are not Duels-only yet has a Duels counterpart, cut those.
+
+
+    }
+
+
+    public boolean isDuelsTreasure() {
+        return NullStringUtil.contains(this.id, "PVPDR_") && NullStringUtil.contains(this.id, "Active");
+    }
+
+    public boolean isDuelsPassive() {
+        return NullStringUtil.contains(this.id, "PVPDR_") && NullStringUtil.contains(this.id, "Passive");
+    }
+
+    @RequiresInitializedCardList
+    public boolean isDuelsStarterTreasure() {
+        List<String> duelHeroes = Search.filterCards(c -> NullStringUtil.contains(c.id, "PVPDR_HERO_")).stream()
+                .map(card -> card.id.substring(11)).toList();
+        for (String duelHero : duelHeroes) {
+            if (NullStringUtil.contains(this.id, "PVPDR_" + duelHero)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /**
-     * Builder class, which is Latin for being smothered in boiler plate
+     * Builder class, which is Latin for being smothered in boilerplate
      * Contains every single field in Card, and methods to set them. Basic builder stuff.
      */
     public static class Builder {
@@ -331,7 +411,7 @@ public class Card {
         private Rarity rarity;
 
         /**
-         * A builder with all fields set to null. Any ints are set to Integer.MAX_VALUE, cuz why not
+         * A builder with all fields set to default. Any ints are set to Integer.MAX_VALUE, cuz why not
          * Use Card.Builder.template() instead
          */
         public Builder() {

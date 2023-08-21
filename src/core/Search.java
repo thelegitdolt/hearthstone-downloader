@@ -11,7 +11,11 @@ import java.util.function.Predicate;
 
 public class Search {
     public static void search(Predicate<Card> criteria) {
-        moveFiles(CardList.stream().filter(criteria).toList());
+        moveFiles(filterCards(criteria));
+    }
+
+    public static List<Card> filterCards(Predicate<Card> criteria) {
+        return CardList.stream().filter(criteria).toList();
     }
 
     private static void moveFiles(List<Card> toMove) {
