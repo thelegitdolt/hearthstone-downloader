@@ -40,14 +40,15 @@ public class Card {
     private final Integer health;
     private final CardType type;
     private final Rarity rarity;
+    private final boolean elite;
 
-    public static final Card NULL_CARD = new Card(null, null, null, Integer.MAX_VALUE, null, null, false, null, Integer.MAX_VALUE, Integer.MAX_VALUE, null, null);
+    public static final Card NULL_CARD = new Card(null, null, null, Integer.MAX_VALUE, null, null, false, null, Integer.MAX_VALUE, Integer.MAX_VALUE, null, null, false);
 
 
     /**
      * private constructor; use the Card.Builder instead
      */
-    private Card(CardClass cardClass, String name, String text, int cost, String id, String artist, boolean collectible, CardSet set, int attack, int health, CardType type, Rarity rarity) {
+    private Card(CardClass cardClass, String name, String text, int cost, String id, String artist, boolean collectible, CardSet set, int attack, int health, CardType type, Rarity rarity, boolean elite) {
         this.cardClass = cardClass;
         this.name = name;
         this.text = text;
@@ -60,6 +61,7 @@ public class Card {
         this.type = type;
         this.health = health;
         this.rarity = rarity;
+        this.elite = elite;
     }
 
     public boolean isLootCard() {
@@ -69,6 +71,11 @@ public class Card {
         boolean isSpell = this.getType() == CardType.SPELL;
 
         return isCost0 && hasNoArtist && hasText && isSpell;
+    }
+
+    public boolean isBattlegroundGolden() {
+        return this.id.contains("BaconUps") ||
+                (this.set == CardSet.BATTLEGROUNDS && this.id.endsWith("_G"));
     }
 
     public CardType getType() {
@@ -133,6 +140,7 @@ public class Card {
      * @param file the file to look up
      * @return Optional<Card> </Card> that contains said card, if it exists.
      */
+    @RequiresInitializedCardList
     public static Optional<Card> lookup(File file) {
         return lookup(Util.idFromFile(file));
     }
@@ -156,6 +164,10 @@ public class Card {
 
     public boolean isSoloHero() {
         return this.type == CardType.HERO && this.cost == Integer.MAX_VALUE;
+    }
+
+    public boolean isElite() {
+        return elite;
     }
 
 
@@ -228,6 +240,20 @@ public class Card {
         return this.getName() + " " + this.getId();
     }
 
+    /**
+     * Whether a card is should be installed (based on my personal preferences).
+     * A card is not installed if it:
+     * - Is the version of a Battlegrounds card
+     * - Has gray placeholder art // todo
+     *
+     */
+    public boolean shouldOmitFromInstall() {
+        return this.isMercenaries() &&
+               this.isLootCard() &&
+               this.isBattlegroundGolden() &&
+               this.isEnchantment() &&
+               this.isPuzzleLab();
+    }
 
     /**
      * Full information on the card
@@ -410,6 +436,7 @@ public class Card {
         private Integer health;
         private CardType type;
         private Rarity rarity;
+        private boolean elite;
 
         /**
          * A builder with all fields set to default. Any ints are set to Integer.MAX_VALUE, cuz why not
@@ -428,6 +455,7 @@ public class Card {
             this.health = Integer.MAX_VALUE;
             this.type = CardType.BLANK;
             this.rarity = Rarity.INVALID;
+            this.elite = false;
         }
 
         public static Builder template() {
@@ -498,12 +526,17 @@ public class Card {
             return this;
         }
 
+        public Card.Builder elite(boolean entry) {
+            this.elite = entry;
+            return this;
+        }
+
 
         /**
          * Build your card after you are done setting everything.
          */
         public Card build() {
-            return new Card(this.cardClass, this.name, this.text, this.cost, this.id, this.artist, this.collectible, this.set, this.attack, this.health, this.type, this.rarity);
+            return new Card(this.cardClass, this.name, this.text, this.cost, this.id, this.artist, this.collectible, this.set, this.attack, this.health, this.type, this.rarity, this.elite);
         }
 
         public void fillFromMap(String map) {
@@ -530,6 +563,7 @@ public class Card {
                 case "set" -> this.set(CardSet.valueOf(value));
                 case "rarity" -> this.rarity(Rarity.valueOf(value));
                 case "type" -> this.type(CardType.valueOf(value));
+                case "elite" -> this.elite(Boolean.parseBoolean(value));
             }
         }
     }

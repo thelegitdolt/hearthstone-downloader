@@ -1,6 +1,7 @@
 package util;
 
 import core.Card;
+import values.CardSet;
 
 import java.util.function.Predicate;
 
@@ -10,14 +11,7 @@ import java.util.function.Predicate;
  */
 public class PredsUtil {
     public static final Predicate<Card> ALWAYS_TRUE = a -> true;
-    public static final Predicate<Card> IS_MERCENARY = Card::isMercenaries;
-    public static final Predicate<Card> IS_LOOT_CARD = Card::isLootCard;
-    public static final Predicate<Card> IS_PUZZLE = Card::isPuzzleLab;
-    public static final Predicate<Card> IS_ENCHANTMENT = Card::isEnchantment;
-    public static final Predicate<Card> IS_BG_GOLDEN = idContains("BaconUps");
 
-
-    public static final Predicate<Card> SHOULD_INSTALL = noneTrue(IS_MERCENARY, IS_LOOT_CARD, IS_PUZZLE, IS_ENCHANTMENT, IS_BG_GOLDEN);
     /**
      * Inverts the predicate
      * @return is delegated to Predicates.not(), is placed here for easier access

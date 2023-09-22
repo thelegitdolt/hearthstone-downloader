@@ -1,11 +1,12 @@
 package util;
 
-import datafixers.Lambdas;
+import static datafixers.Lambdas.FileConsumer;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,7 +25,7 @@ public class FileUtil {
      * @param directory - directory, as a File
      * @param action - the action to undertake
      */
-    public static void mapDir(File directory, Lambdas.FileConsumer action, boolean print) {
+    public static void mapDirConditioned(File directory, FileConsumer action, Predicate<File> cond, boolean print) {
         if (!directory.isDirectory())
             return;
 
@@ -35,6 +36,8 @@ public class FileUtil {
 
         int i = 0;
         for (File file : files) {
+            if (!cond.test(file))
+                continue;
             try {
                 action.apply(file);
             }
@@ -42,9 +45,17 @@ public class FileUtil {
                 e.printStackTrace();
             }
             i++;
-            if (i % 500 == 0)
+            if (print && i % 500 == 0)
                 System.out.println(i);
         }
+    }
+
+    public static void mapDirConditioned(String path, FileConsumer action, Predicate<File> condition, boolean print) {
+        mapDirConditioned(new File(path), action, condition, print);
+    }
+
+    public static void mapDir(File directory, FileConsumer action, boolean print) {
+        mapDirConditioned(directory, action, (f) -> true, print);
     }
 
     /**
@@ -52,7 +63,7 @@ public class FileUtil {
      * @param path - the path of the file, as a String
      * @param action - the action to undertake
      */
-    public static void mapDir(String path, Lambdas.FileConsumer action, boolean print) {
+    public static void mapDir(String path, FileConsumer action, boolean print) {
         mapDir(new File(path), action, print);
     }
 

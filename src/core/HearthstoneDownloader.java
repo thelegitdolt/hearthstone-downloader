@@ -1,6 +1,7 @@
 package core;
 
 import util.FileUtil;
+import util.ImgUtil;
 import util.PredsUtil;
 
 import java.io.File;
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,10 +24,11 @@ import java.util.function.Predicate;
  * @author Dolt
  */
 public class HearthstoneDownloader {
-    private static final String SOURCE_API_URL = "https://art.hearthstonejson.com/v1/render/latest/enUS/512x/";
+    private static final String SOURCE_API_URL = "https://static.firestoneapp.com/cards/enUS/512/id_here.png";
+    private static final String SOURCE_API_URL_BG = "https://static.firestoneapp.com/cards/bgs/enUS/512/id_here.png";
 
     public static void defaultRun() throws IOException {
-        downloadAll(processAllCards(FileUtil.READTXT_FILEPATH, PredsUtil.SHOULD_INSTALL));
+        downloadAll(processAllCards(FileUtil.READTXT_FILEPATH, PredsUtil.not(Card::shouldOmitFromInstall)), Card::toString);
     }
 
     public static List<Card> processAllCards(String path, Predicate<Card> pred) throws FileNotFoundException {
@@ -52,21 +55,8 @@ public class HearthstoneDownloader {
         return cards;
     }
 
-    public static void downloadAll(List<Card> cards) throws IOException {
-        downloadAll(cards, PredsUtil.ALWAYS_TRUE);
-    }
-
-    public static void downloadAll(List<Card> cards, Predicate<Card> cardPred) throws IOException {
-        downloadAll(cards, cardPred, Card::toString);
-    }
-
-    public static void downloadAll(List<Card> cards, Function<Card, String> nameFunc) throws IOException {
-        downloadAll(cards, PredsUtil.ALWAYS_TRUE, nameFunc);
-    }
-
-    public static void downloadAll(List<Card> cards, Predicate<Card> cardPred, Function<Card, String> nameFunc) throws IOException {
+    public static void downloadAll(List<Card> queue, Function<Card, String> nameFunc) throws IOException {
         new File(FileUtil.CARD_FOLDER_FILEPATH).mkdirs();
-        List<Card> queue = cards.stream().filter(cardPred).toList();
 
         int queueSize = queue.size();
         System.out.println("Card download started! Queueing up  " + queueSize + " cards for download.");
@@ -83,7 +73,20 @@ public class HearthstoneDownloader {
             if (card.fileExists())
                 continue;
 
-            URL url = new URL(SOURCE_API_URL + card.getId() + ".png" );
+            URL bgUrl = new URL(SOURCE_API_URL_BG.replace("id_here", card.getId()));
+            try {
+                try (InputStream in = bgUrl.openStream()) {
+                    String path = FileUtil.CARD_FOLDER_FILEPATH + "/" + nameFunc.apply(card) + ".png";
+                    Files.copy(in, Path.of(path));
+
+                    ImgUtil.cropIgnoreException(new File(path));
+                    continue;
+                }
+            }
+            catch (FileNotFoundException ignored) {}
+
+
+            URL url = new URL(SOURCE_API_URL.replace("id_here", card.getId()));
             try {
                 try (InputStream in = url.openStream()) {
                     String path = FileUtil.CARD_FOLDER_FILEPATH + "/" + nameFunc.apply(card) + ".png";

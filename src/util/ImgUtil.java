@@ -119,9 +119,8 @@ public class ImgUtil {
      * Finds the dimension of an image, trimming away all the empty space.
      * @param img the image to find the generates on
      * @return a Pair<Pair<First vertical slice of image with a nontransparent pixel, last vertical slice>, Pair<First vertical slice, Last vertical slice>>
-     * @throws IOException if img is null
      */
-    public static Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> getPixelLimit(BufferedImage img) throws IOException {
+    public static Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> getPixelLimit(BufferedImage img) {
         Pair<Integer, Integer> xLimit = new Pair<>(null, null);
         Pair<Integer, Integer> yLimit = new Pair<>(null, null);
         boolean a = false;

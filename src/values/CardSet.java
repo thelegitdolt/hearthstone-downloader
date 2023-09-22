@@ -62,5 +62,4 @@ public enum CardSet {
     TITANS,
     WONDERS,
     PATH_OF_ARTHAS;
-
 }

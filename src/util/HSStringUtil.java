@@ -21,7 +21,8 @@ public class HSStringUtil {
         if (entry.lastIndexOf("\"") == entry.length() - 1) {
             value = HSStringUtil.trimChar(value);
             value = value.substring(1);
-        } else if (value.charAt(0) == '\"') {
+        }
+        else if (value.charAt(0) == '\"') {
             value = value.substring(1);
         }
 
