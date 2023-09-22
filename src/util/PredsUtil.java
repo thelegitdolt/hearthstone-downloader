@@ -9,12 +9,15 @@ import java.util.function.Predicate;
  * @author Dolt
  */
 public class PredsUtil {
-    public static final Predicate<Card> ALWAYS_TRUE = card -> true;
+    public static final Predicate<Card> ALWAYS_TRUE = a -> true;
     public static final Predicate<Card> IS_MERCENARY = Card::isMercenaries;
     public static final Predicate<Card> IS_LOOT_CARD = Card::isLootCard;
     public static final Predicate<Card> IS_PUZZLE = Card::isPuzzleLab;
     public static final Predicate<Card> IS_ENCHANTMENT = Card::isEnchantment;
+    public static final Predicate<Card> IS_BG_GOLDEN = idContains("BaconUps");
 
+
+    public static final Predicate<Card> SHOULD_INSTALL = noneTrue(IS_MERCENARY, IS_LOOT_CARD, IS_PUZZLE, IS_ENCHANTMENT, IS_BG_GOLDEN);
     /**
      * Inverts the predicate
      * @return is delegated to Predicates.not(), is placed here for easier access
@@ -36,6 +39,11 @@ public class PredsUtil {
      */
     public static Predicate<Card> isName(String name) {
         return (card) -> NullStringUtil.equals(name, card.getName());
+    }
+
+
+    public static Predicate<Card> idContains(String chars) {
+        return (card) -> NullStringUtil.contains(chars, card.getId());
     }
 
     /**

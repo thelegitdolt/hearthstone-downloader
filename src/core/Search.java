@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Predicate;
 
 public class Search {
@@ -16,6 +17,10 @@ public class Search {
 
     public static List<Card> filterCards(Predicate<Card> criteria) {
         return CardList.stream().filter(criteria).toList();
+    }
+
+    public static void searchWithChanceIn(int outOf) {
+        search(c -> new Random().nextInt(outOf) == 0);
     }
 
     private static void moveFiles(List<Card> toMove) {

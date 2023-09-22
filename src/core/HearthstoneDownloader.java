@@ -24,6 +24,10 @@ import java.util.function.Predicate;
 public class HearthstoneDownloader {
     private static final String SOURCE_API_URL = "https://art.hearthstonejson.com/v1/render/latest/enUS/512x/";
 
+    public static void defaultRun() throws IOException {
+        downloadAll(processAllCards(FileUtil.READTXT_FILEPATH, PredsUtil.SHOULD_INSTALL));
+    }
+
     public static List<Card> processAllCards(String path, Predicate<Card> pred) throws FileNotFoundException {
         Scanner file = new Scanner(new File(path));
         List<Card> cards = new ArrayList<>();
@@ -61,6 +65,7 @@ public class HearthstoneDownloader {
     }
 
     public static void downloadAll(List<Card> cards, Predicate<Card> cardPred, Function<Card, String> nameFunc) throws IOException {
+        new File(FileUtil.CARD_FOLDER_FILEPATH).mkdirs();
         List<Card> queue = cards.stream().filter(cardPred).toList();
 
         int queueSize = queue.size();
@@ -70,23 +75,22 @@ public class HearthstoneDownloader {
         int error = 0;
         int percentage = 0;
         for (Card card : queue) {
-            URL url = new URL(SOURCE_API_URL + card.getId() + ".png" );
-
-            try {
-                try (InputStream in = url.openStream()) {
-                    String path = FileUtil.CARD_FOLDER_FILEPATH + "/" + nameFunc.apply(card);
-
-                    Files.copy(in, Paths.get(path));
-                }
-            }
-            catch (FileNotFoundException e) {
-                error++;
-            }
-
             if (queue.indexOf(card) % (queueSize / 100) == 0 ) {
                 System.out.println(percentage + "%");
                 percentage++;
             }
+
+            if (card.fileExists())
+                continue;
+
+            URL url = new URL(SOURCE_API_URL + card.getId() + ".png" );
+            try {
+                try (InputStream in = url.openStream()) {
+                    String path = FileUtil.CARD_FOLDER_FILEPATH + "/" + nameFunc.apply(card) + ".png";
+                    Files.copy(in, Paths.get(path));
+                }
+            }
+            catch (FileNotFoundException e) {error++;}
         }
 
         System.out.println("Card download finished!");

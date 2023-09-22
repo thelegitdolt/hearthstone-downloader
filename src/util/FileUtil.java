@@ -56,4 +56,8 @@ public class FileUtil {
         mapDir(new File(path), action, print);
     }
 
+    public static File inFolder(String str) {
+        return new File(CARD_FOLDER_FILEPATH + "/" + str);
+    }
+
 }

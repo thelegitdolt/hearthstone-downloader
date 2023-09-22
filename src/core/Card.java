@@ -43,6 +43,7 @@ public class Card {
 
     public static final Card NULL_CARD = new Card(null, null, null, Integer.MAX_VALUE, null, null, false, null, Integer.MAX_VALUE, Integer.MAX_VALUE, null, null);
 
+
     /**
      * private constructor; use the Card.Builder instead
      */
@@ -87,7 +88,9 @@ public class Card {
         return collectible == card.collectible && cardClass == card.cardClass && Objects.equals(name, card.name) && Objects.equals(text, card.text) && Objects.equals(cost, card.cost) && Objects.equals(id, card.id) && Objects.equals(artist, card.artist) && set == card.set && Objects.equals(attack, card.attack) && Objects.equals(health, card.health) && type == card.type;
     }
 
-
+    public boolean fileExists() {
+        return new File(FileUtil.CARD_FOLDER_FILEPATH + "/" + this + ".png").exists();
+    }
 
     @Override
     public int hashCode() {
@@ -367,7 +370,6 @@ public class Card {
     private static void decideDeleteUncollectibles(List<List<Card>> subsets) {
         // first of all, if any these subsets are not Duels-only yet has a Duels counterpart, cut those.
 
-
     }
 
 
@@ -388,7 +390,6 @@ public class Card {
                 return true;
             }
         }
-
         return false;
     }
 

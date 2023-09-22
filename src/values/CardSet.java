@@ -60,6 +60,7 @@ public enum CardSet {
     RETURN_OF_THE_LICH_KING,
     BATTLE_OF_THE_BANDS,
     TITANS,
+    WONDERS,
     PATH_OF_ARTHAS;
 
 }

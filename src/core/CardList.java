@@ -84,6 +84,7 @@ public class CardList {
      * @param preds Any cards that do not meet this Predicate will not be included.
      * @throws FileNotFoundException if your FileUtil.CARD_FOLDER_FILEPATH or FileUtil.READTXT_FILEPATH is wrong.
      */
+    @CardListInitializer
     public static void initializeFiltered(Predicate<Card> preds) throws FileNotFoundException {
         cardList = HearthstoneDownloader.processAllCards(FileUtil.READTXT_FILEPATH, preds);
     }
@@ -96,6 +97,7 @@ public class CardList {
      * @param ids the ids of cards that will be contained in your cardlist.
      * @throws FileNotFoundException if your FileUtil.CARD_FOLDER_FILEPATH or FileUtil.READTXT_FILEPATH is wrong.
      */
+    @CardListInitializer
     public static void initializeWith(boolean sorted, String... ids) throws FileNotFoundException {
         Predicate<Card> pred = (c) -> Arrays.asList(ids).contains(c.getId());
         if (sorted)
@@ -109,6 +111,7 @@ public class CardList {
      * @param ids the ids of cards that will be contained in your cardlist.
      * @throws FileNotFoundException if your FileUtil.CARD_FOLDER_FILEPATH or FileUtil.READTXT_FILEPATH is wrong.
      */
+    @CardListInitializer
     public static void initializeWith(String... ids) throws FileNotFoundException {
         initializeWith(true, ids);
     }
@@ -118,6 +121,7 @@ public class CardList {
      * @param preds optionally, only cards that makes this predicate true will be included in the cardlist.
      * @throws FileNotFoundException if your FileUtil.CARD_FOLDER_FILEPATH or FileUtil.READTXT_FILEPATH is wrong.
      */
+    @CardListInitializer
     public static void initializeSorted(Predicate<Card> preds) throws FileNotFoundException {
         cardList = HearthstoneDownloader.processAllCards(FileUtil.READTXT_FILEPATH, preds).stream()
                 .sorted((first, second) -> String.CASE_INSENSITIVE_ORDER.compare(first.getName(), second.getName()))
@@ -128,6 +132,7 @@ public class CardList {
      * Initializes a sorted cardlist containing every card, no predicates.
      * @throws FileNotFoundException if your FileUtil.CARD_FOLDER_FILEPATH or FileUtil.READTXT_FILEPATH is wrong.
      */
+    @CardListInitializer
     public static void initializeSorted() throws FileNotFoundException {
         initializeSorted(PredsUtil.ALWAYS_TRUE);
     }
@@ -136,6 +141,7 @@ public class CardList {
      * initializeCardList that will contain all cards by default with no filtering.
      * Done by calling Card.initializeCardList(preds) with a predicate that is always true.
      */
+    @CardListInitializer
     public static void initialize() throws FileNotFoundException {
         initializeSorted(PredsUtil.ALWAYS_TRUE);
     }
