@@ -1,4 +1,3 @@
-import core.Card;
 import core.CardList;
 
 import java.io.IOException;
