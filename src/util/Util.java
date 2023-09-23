@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class Util {
     public static String idFromFile(String str) {
@@ -49,8 +50,8 @@ public class Util {
     }
 
 
-    public static <E> void removeIfThenApply(List<E> list, Predicate<? super E> criteria, Consumer<E> action) {
-        for (E element : list.stream().filter(criteria).toList()) {
+    public static <E> void removeIfThenApply(Collection<E> list, Predicate<? super E> criteria, Consumer<E> action) {
+        for (E element : list.stream().filter(criteria).collect(Collectors.toUnmodifiableSet())) {
             action.accept(element);
         }
 

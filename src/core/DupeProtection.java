@@ -7,23 +7,26 @@ import values.CardSet;
 import values.CardType;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class DupeProtection {
     @RequiresInitializedCardList
     public static void listDupes() {
-        List<Card> withName = new ArrayList<>();
+        Set<Card> withName = new HashSet<>();
 
         CardList.forEach((card) -> {
             if (card.getImagePath().isEmpty()) {
                 return;
             }
 
-            if ((withName.size() > 0 && !NullStringUtil.equals(card.getName(),  withName.get(0).getName())) ) {
+            Card c = withName.iterator().next();
+            if ((withName.size() > 0 && !NullStringUtil.equals(card.getName(),  c.getName())) ) {
                 if (withName.size() > 1 && withName.stream().anyMatch(Card::isCollectible))
-                    System.out.println(withName.get(0).getName());
+                    System.out.println(c.getName());
             }
 
             withName.add(card);
@@ -32,14 +35,14 @@ public class DupeProtection {
 
     @RequiresInitializedCardList
     public static void deleteDupes() {
-        List<Card> withName = new ArrayList<>();
+        Set<Card> withName = new HashSet<>();
 
         CardList.forEach((card) -> {
             if (card.getImagePath().isEmpty()) {
                 return;
             }
 
-            if ((withName.size() > 0 && !NullStringUtil.equals(card.getName(),  withName.get(0).getName())) ) {
+            if ((withName.size() > 0 && !NullStringUtil.equals(card.getName(),  withName.iterator().next().getName())) ) {
 //                    if (withName.size() > 1 && withName.stream().anyMatch(Card::isCollectible))
 //                         System.out.println(withName.get(0).getName());
 
@@ -51,18 +54,18 @@ public class DupeProtection {
         });
     }
 
-    private static List<File> decideDelete(List<Card> cards) {
-        List<Card> toReturn = new ArrayList<>();
+    private static List<File> decideDelete(Set<Card> cards) {
+        Set<Card> toReturn = new HashSet<>();
 
         // divide all cards into a number of subsets
         // each subset should have identical names, texts, costs, attacks, healths, card type, and race/spell school
-        List<List<Card>> subsets = new ArrayList<>();
+        Set<Set<Card>> subsets = new HashSet<>();
 
         boolean hasHome = false;
 
         for (Card card : cards) {
-            for (List<Card> subset : subsets) {
-                if (subset.get(0).isMostlyEqual(card)) {
+            for (Set<Card> subset : subsets) {
+                if (subset.iterator().next().isMostlyEqual(card)) {
                     subset.add(card);
                     hasHome = true;
                 }
@@ -72,14 +75,14 @@ public class DupeProtection {
                 continue;
             }
 
-            List<Card> newSubSet = new ArrayList<>();
+            Set<Card> newSubSet = new HashSet<>();
             newSubSet.add(card);
             subsets.add(newSubSet);
         }
 
 
         // Drop all subsets with only uncollectible cards; I will handle these separately
-        List<List<Card>> uncollectibles = subsets.stream().filter((list) -> list.stream().noneMatch(Card::isCollectible)).toList();
+        Set<Set<Card>> uncollectibles = subsets.stream().filter((list) -> list.stream().noneMatch(Card::isCollectible)).collect(Collectors.toSet());
         decideDeleteUncollectibles(uncollectibles, toReturn);
 
         subsets.removeIf((list) -> list.stream().noneMatch(Card::isCollectible));
@@ -87,13 +90,13 @@ public class DupeProtection {
 
 
         // from each subset, if there are collectible cards inside, filter out any cards that are not collectible
-        for (List<Card> subset : subsets) {
+        for (Set<Card> subset : subsets) {
             if (Util.notAllElementsMatch(subset, Card::isCollectible))
                 Util.removeIfThenApply(subset, PredsUtil.not(Card::isCollectible), toReturn::add);
         }
 
         // if one of the minions is in the core set, get rid of it.
-        for (List<Card> subset : subsets) {
+        for (Set<Card> subset : subsets) {
             if (Util.notAllElementsMatch(subset, (a) -> a.getSet() == CardSet.CORE))
                 Util.removeIfThenApply(subset, c -> c.getSet() == CardSet.CORE, toReturn::add);
         }
@@ -102,13 +105,14 @@ public class DupeProtection {
     }
 
 
-    private static void decideDeleteUncollectibles(List<List<Card>> subsets, List<Card> toReturn) {
-        if (NullStringUtil.equals(subsets.get(0).get(0).getName(), "The Coin"))
+    private static void decideDeleteUncollectibles(Set<Set<Card>> subsets, Set<Card> toReturn) {
+        if (NullStringUtil.equals(subsets.iterator().next().iterator().next().getName(), "The Coin"))
             return;
 
         // first of all, if any these subsets are not Duels-only yet has a Duels counterpart, cut those.
-        for (List<Card> subset : subsets) {
-            if ((subset.get(0).isDuelsPassive() || subset.get(0).isDuelsTreasure()) && subsets.size() > 1) {
+        for (Set<Card> subset : subsets) {
+            Card c = subset.iterator().next();
+            if ((c.isDuelsPassive() || c.isDuelsTreasure()) && subsets.size() > 1) {
                 toReturn.addAll(subset);
 
                 subset.clear();
@@ -116,8 +120,9 @@ public class DupeProtection {
         }
 
         // Clear any tavern brawl hero powers; they don't really do a lot
-        for (List<Card> subset : subsets) {
-            if (subsets.size() > 1 && subset.get(0).getType() == CardType.HERO_POWER && subset.get(0).getId().endsWith("_TB")) {
+        for (Set<Card> subset : subsets) {
+            Card c = subset.iterator().next();
+            if (subsets.size() > 1 && c.getType() == CardType.HERO_POWER && c.getId().endsWith("_TB")) {
                 toReturn.addAll(subset);
 
                 subset.clear();
