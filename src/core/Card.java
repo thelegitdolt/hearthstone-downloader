@@ -11,6 +11,7 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A class that represents a single Card. Designed to be converted from the api.hearthstone.com jsons.
@@ -23,10 +24,15 @@ public class Card {
      */
     public static final int PLACEHOLDER_GRAY_RGB = -5927560;
 
-    public static final String[] BLACKLIST = {
-        ""
+    /**
+     * If a card has the following ids, it will never be downloaded.
+     */
+    public static final Set<String> ID_BLACKLIST = Set.of();
 
-    };
+    /**
+     * If a card is of a set listed below, it will never be downloaded.
+     */
+    public static final Set<CardSet> SET_BLACKLIST = Set.of(CardSet.VANILLA, CardSet.LETTUCE);
 
     private final CardClass cardClass;
     private final String name;
@@ -150,13 +156,6 @@ public class Card {
         return name;
     }
 
-    /**
-     * Checks whether a card is a Mercenary card by seeing if belongs to the Lettuce set.
-     * @return true if this card is of CardSet.LETTUCE, false if not.
-     */
-    public boolean isMercenaries() {
-        return this.set == CardSet.LETTUCE;
-    }
 
     public boolean isBattlegrounds() {
         return this.set == CardSet.BATTLEGROUNDS;
@@ -245,14 +244,19 @@ public class Card {
      * A card is not installed if it:
      * - Is the version of a Battlegrounds card
      * - Has gray placeholder art // todo
-     *
+     * - Is specifically blacklisted
+     * - has a ??? name or text
      */
     public boolean shouldOmitFromInstall() {
-        return this.isMercenaries() &&
-               this.isLootCard() &&
-               this.isBattlegroundGolden() &&
-               this.isEnchantment() &&
-               this.isPuzzleLab();
+        return this.isLootCard() ||
+               this.isBattlegroundGolden() ||
+               this.isEnchantment() ||
+               this.isPuzzleLab() ||
+               SET_BLACKLIST.contains(set) ||
+               ID_BLACKLIST.contains(id) ||
+               NullStringUtil.equals(name, "???") ||
+               NullStringUtil.equals(text, "???") ||
+               NullStringUtil.equals(text, "<b>???</b>");
     }
 
     /**
@@ -298,121 +302,26 @@ public class Card {
     }
 
 
-
-    private boolean isMostlyEqual(Card o) {
+    public boolean isMostlyEqual(Card o) {
         return o.name.equals(name) && o.text.equals(text) && Objects.equals(o.getCost(), cost)
                 && o.attack.equals(attack) && o.health.equals(health) && o.type == type;
     }
 
-    @RequiresInitializedCardList
-    public static void crudeDeleteDupes() {
-        List<Card> withName = new ArrayList<>();
-
-        CardList.forEach((card) -> {
-            if (card.getImagePath().isEmpty()) {
-                return;
-            }
-
-            if ((withName.size() > 0 && !NullStringUtil.equals(card.getName(),  withName.get(0).getName())) ) {
-//                    if (withName.size() > 1 && withName.stream().anyMatch(Card::isCollectible))
-//                         System.out.println(withName.get(0).getName());
-
-                Card.decideDelete(withName).forEach(File::delete);
-                withName.clear();
-            }
-
-            withName.add(card);
-        });
-    }
-
-
-    @RequiresInitializedCardList
-    public static void crudeListDupes() {
-        List<Card> withName = new ArrayList<>();
-
-        CardList.forEach((card) -> {
-            if (card.getImagePath().isEmpty()) {
-                return;
-            }
-
-            if ((withName.size() > 0 && !NullStringUtil.equals(card.getName(),  withName.get(0).getName())) ) {
-                if (withName.size() > 1 && withName.stream().anyMatch(Card::isCollectible))
-                    System.out.println(withName.get(0).getName());
-            }
-
-            withName.add(card);
-        });
-    }
-
-    public static List<File> decideDelete(List<Card> cards) {
-        List<Card> toReturn = new ArrayList<>();
-
-        // divide all cards into a number of subsets
-        // each subset should have identical names, texts, costs, attacks, healths, card type, and race/spell school
-        List<List<Card>> subsets = new ArrayList<>();
-
-        boolean hasHome = false;
-
-        for (Card card : cards) {
-            for (List<Card> subset : subsets) {
-                if (subset.get(0).isMostlyEqual(card)) {
-                    subset.add(card);
-                    hasHome = true;
-                }
-            }
-            if (hasHome) {
-                hasHome = false;
-                continue;
-            }
-
-            List<Card> newSubSet = new ArrayList<>();
-            newSubSet.add(card);
-            subsets.add(newSubSet);
-        }
-
-
-        // Drop all subsets with only uncollectible cards; I will handle these separately
-        List<List<Card>> uncollectibles = subsets.stream().filter((list) -> list.stream().noneMatch(Card::isCollectible)).toList();
-        decideDeleteUncollectibles(uncollectibles);
-
-        subsets.removeIf((list) -> list.stream().noneMatch(Card::isCollectible));
-
-
-
-        // from each subset, if there are collectible cards inside, filter out any cards that are not collectible
-        for (List<Card> subset : subsets) {
-            if (subset.stream().anyMatch(Card::isCollectible))
-                Util.removeIfThenApply(subset, PredsUtil.not(Card::isCollectible), toReturn::add);
-        }
-
-        // if one of the minions has "CORE" in its id name, get rid of all the others.
-        for (List<Card> subset : subsets) {
-            if (subset.stream().anyMatch(card -> NullStringUtil.contains(card.id, "CORE_")))
-                Util.removeIfThenApply(subset, c -> NullStringUtil.contains(c.id, "CORE_"), toReturn::add);
-        }
-        return toReturn.stream().map(card -> card.getImagePath().orElse(null)).filter(Objects::nonNull).toList();
-    }
-
-    private static void decideDeleteUncollectibles(List<List<Card>> subsets) {
-        // first of all, if any these subsets are not Duels-only yet has a Duels counterpart, cut those.
-
-    }
-
-
     public boolean isDuelsTreasure() {
-        return NullStringUtil.contains(this.id, "PVPDR_") && NullStringUtil.contains(this.id, "Active");
+        return NullStringUtil.contains(id, "PVPDR_") && NullStringUtil.contains(this.id, "Active");
     }
 
     public boolean isDuelsPassive() {
-        return NullStringUtil.contains(this.id, "PVPDR_") && NullStringUtil.contains(this.id, "Passive");
+        return NullStringUtil.contains(id, "PVPDR_") && NullStringUtil.contains(this.id, "Passive");
     }
 
     @RequiresInitializedCardList
     public boolean isDuelsStarterTreasure() {
-        List<String> duelHeroes = Search.filterCards(c -> NullStringUtil.contains(c.id, "PVPDR_HERO_")).stream()
-                .map(card -> card.id.substring(11)).toList();
+        Set<String> duelHeroes = Search.filterCards(c -> NullStringUtil.contains(c.id, "PVPDR_HERO_")).stream()
+                .map(card -> card.id.substring(11)).collect(Collectors.toUnmodifiableSet());
+
         for (String duelHero : duelHeroes) {
-            if (NullStringUtil.contains(this.id, "PVPDR_" + duelHero)) {
+            if (NullStringUtil.contains(id, "PVPDR_" + duelHero)) {
                 return true;
             }
         }

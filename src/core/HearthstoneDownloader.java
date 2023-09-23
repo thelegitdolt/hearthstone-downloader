@@ -28,12 +28,13 @@ public class HearthstoneDownloader {
     private static final String SOURCE_API_URL_BG = "https://static.firestoneapp.com/cards/bgs/enUS/512/id_here.png";
 
     public static void defaultRun() throws IOException {
-        downloadAll(processAllCards(FileUtil.READTXT_FILEPATH, PredsUtil.not(Card::shouldOmitFromInstall)), Card::toString);
+        List<Card> cards = new ArrayList<>();
+        processAllCards(FileUtil.READTXT_FILEPATH, PredsUtil.not(Card::shouldOmitFromInstall), cards);
+        downloadAll(cards, Card::toString);
     }
 
-    public static List<Card> processAllCards(String path, Predicate<Card> pred) throws FileNotFoundException {
+    public static void processAllCards(String path, Predicate<Card> pred, List<Card> cards) throws FileNotFoundException {
         Scanner file = new Scanner(new File(path));
-        List<Card> cards = new ArrayList<>();
 
         Card.Builder newCard = Card.Builder.template();
         while (file.hasNextLine()) {
@@ -51,8 +52,6 @@ public class HearthstoneDownloader {
 
             newCard.fillFromMap(nextLine);
         }
-
-        return cards;
     }
 
     public static void downloadAll(List<Card> queue, Function<Card, String> nameFunc) throws IOException {

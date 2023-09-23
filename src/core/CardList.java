@@ -18,7 +18,7 @@ import java.util.stream.Stream;
  * @author Dolt
  */
 public class CardList {
-    private static List<Card> cardList = new ArrayList<>();
+    private final static List<Card> cardList = new ArrayList<>();
 
     /**
      * Gets the card list for you.
@@ -86,7 +86,7 @@ public class CardList {
      */
     @CardListInitializer
     public static void initializeFiltered(Predicate<Card> preds) throws FileNotFoundException {
-        cardList = HearthstoneDownloader.processAllCards(FileUtil.READTXT_FILEPATH, preds);
+        HearthstoneDownloader.processAllCards(FileUtil.READTXT_FILEPATH, preds, cardList);
     }
 
 
@@ -123,8 +123,8 @@ public class CardList {
      */
     @CardListInitializer
     public static void initializeSorted(Predicate<Card> preds) throws FileNotFoundException {
-        cardList = HearthstoneDownloader.processAllCards(FileUtil.READTXT_FILEPATH, preds).stream()
-                .sorted((first, second) -> String.CASE_INSENSITIVE_ORDER.compare(first.getName(), second.getName()))
+        HearthstoneDownloader.processAllCards(FileUtil.READTXT_FILEPATH, preds, cardList);
+        stream().sorted((first, second) -> String.CASE_INSENSITIVE_ORDER.compare(first.getName(), second.getName()))
                 .toList();
     }
 

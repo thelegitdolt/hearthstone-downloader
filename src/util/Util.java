@@ -122,6 +122,23 @@ public class Util {
         return img.getSubimage(x, y, w, h);
     }
 
+    public static <T> boolean notAllElementsMatch(Iterable<T> list, Predicate<? super T> cond) {
+        boolean match = false;
+        boolean noMatch = false;
+
+        for (T t : list) {
+            if (cond.test(t))
+                match = true;
+            else
+                noMatch = true;
+
+            if (match && noMatch)
+                return true;
+        }
+
+        return false;
+    }
+
 }
 
 

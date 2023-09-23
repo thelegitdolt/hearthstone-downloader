@@ -37,8 +37,13 @@ public class PredsUtil {
 
 
     public static Predicate<Card> idContains(String chars) {
-        return (card) -> NullStringUtil.contains(chars, card.getId());
+        return (card) -> NullStringUtil.contains(card.getId(), chars);
     }
+
+    public static Predicate<Card> textContains(String chars) {
+        return (card) -> NullStringUtil.contains(card.getText(), chars);
+    }
+
 
     /**
      * @param preds as many predicates as you want
