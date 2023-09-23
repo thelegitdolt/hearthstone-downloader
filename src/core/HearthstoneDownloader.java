@@ -12,9 +12,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -28,12 +26,12 @@ public class HearthstoneDownloader {
     private static final String SOURCE_API_URL_BG = "https://static.firestoneapp.com/cards/bgs/enUS/512/id_here.png";
 
     public static void defaultRun() throws IOException {
-        List<Card> cards = new ArrayList<>();
+        Set<Card> cards = new HashSet<>();
         processAllCards(FileUtil.READTXT_FILEPATH, PredsUtil.not(Card::shouldOmitFromInstall), cards);
         downloadAll(cards, Card::toString);
     }
 
-    public static void processAllCards(String path, Predicate<Card> pred, List<Card> cards) throws FileNotFoundException {
+    public static void processAllCards(String path, Predicate<Card> pred, Set<Card> cards) throws FileNotFoundException {
         Scanner file = new Scanner(new File(path));
 
         Card.Builder newCard = Card.Builder.template();
@@ -54,23 +52,25 @@ public class HearthstoneDownloader {
         }
     }
 
-    public static void downloadAll(List<Card> queue, Function<Card, String> nameFunc) throws IOException {
+    public static void downloadAll(Set<Card> queue, Function<Card, String> nameFunc) throws IOException {
         new File(FileUtil.CARD_FOLDER_FILEPATH).mkdirs();
 
         int queueSize = queue.size();
         System.out.println("Card download started! Queueing up  " + queueSize + " cards for download.");
         System.out.println("Progress:");
 
-        int error = 0;
         int percentage = 0;
+        int count = 0;
         for (Card card : queue) {
-            if (queue.indexOf(card) % (queueSize / 100) == 0 ) {
+            if (count % (queueSize / 100) == 0 ) {
                 System.out.println(percentage + "%");
                 percentage++;
             }
 
             if (card.fileExists())
                 continue;
+
+            count++;
 
             URL bgUrl = new URL(SOURCE_API_URL_BG.replace("id_here", card.getId()));
             try {
@@ -92,12 +92,10 @@ public class HearthstoneDownloader {
                     Files.copy(in, Paths.get(path));
                 }
             }
-            catch (FileNotFoundException e) {error++;}
+            catch (FileNotFoundException ignored) {}
         }
 
         System.out.println("Card download finished!");
-        if (error > 0)
-            System.out.println("Did not download " + error + " cards as their information could not be retrieved.");
     }
 
 }

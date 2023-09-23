@@ -3,7 +3,6 @@ package core;
 import util.NullStringUtil;
 import util.PredsUtil;
 import util.Util;
-import values.CardSet;
 import values.CardType;
 
 import java.io.File;
@@ -18,7 +17,7 @@ public class DupeProtection {
     public static void listDupes() {
         Set<Card> withName = new HashSet<>();
 
-        CardList.forEach((card) -> {
+        CardSet.forEach((card) -> {
             if (card.getImagePath().isEmpty()) {
                 return;
             }
@@ -37,7 +36,7 @@ public class DupeProtection {
     public static void deleteDupes() {
         Set<Card> withName = new HashSet<>();
 
-        CardList.forEach((card) -> {
+        CardSet.forEach((card) -> {
             if (card.getImagePath().isEmpty()) {
                 return;
             }
@@ -97,8 +96,8 @@ public class DupeProtection {
 
         // if one of the minions is in the core set, get rid of it.
         for (Set<Card> subset : subsets) {
-            if (Util.notAllElementsMatch(subset, (a) -> a.getSet() == CardSet.CORE))
-                Util.removeIfThenApply(subset, c -> c.getSet() == CardSet.CORE, toReturn::add);
+            if (Util.notAllElementsMatch(subset, (a) -> a.getSet() == values.CardSet.CORE))
+                Util.removeIfThenApply(subset, c -> c.getSet() == values.CardSet.CORE, toReturn::add);
         }
 
         return toReturn.stream().map(card -> card.getImagePath().orElse(null)).filter(Objects::nonNull).toList();

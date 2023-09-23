@@ -4,9 +4,7 @@ import util.FileUtil;
 import util.PredsUtil;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -17,36 +15,21 @@ import java.util.stream.Stream;
  * Also contains helpful features from the ArrayList class so you don't have to do CardList.list().stream() all the time.
  * @author Dolt
  */
-public class CardList {
-    private final static List<Card> cardList = new ArrayList<>();
+public class CardSet {
+    private final static Set<Card> cardList = new HashSet<>();
 
     /**
      * Gets the card list for you.
      * In you want to do your own thing that the following things won't work on.
      */
     @RequiresInitializedCardList
-    public static List<Card> list() {
+    public static Set<Card> get() {
         return cardList;
     }
 
-    /**
-     * does shorthand for CardList.list().indexOf().
-     */
-    @RequiresInitializedCardList
-    public static int indexOf(Card card) {
-        return cardList.indexOf(card);
-    }
 
     /**
-     * does shorthand for CardList.list().lastIndexOf().
-     */
-    @RequiresInitializedCardList
-    public static int lastIndexOf(Card card) {
-        return cardList.lastIndexOf(card);
-    }
-
-    /**
-     * does shorthand for CardList.list().forEach().
+     * does shorthand for CardList.get().forEach().
      */
     @RequiresInitializedCardList
     public static void forEach(Consumer<Card> action) {
@@ -54,20 +37,13 @@ public class CardList {
     }
 
     /**
-     * does shorthand for CardList.list().stream().
+     * does shorthand for CardList.set().stream().
      */
     @RequiresInitializedCardList
     public static Stream<Card> stream() {
         return cardList.stream();
     }
 
-    /**
-     * does shorthand for CardList.list().get().
-     */
-    @RequiresInitializedCardList
-    public static Card get(int value) {
-        return cardList.get(value);
-    }
 
     /**
      * does shorthand for CardList.list().size().

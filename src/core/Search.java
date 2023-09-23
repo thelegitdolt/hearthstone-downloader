@@ -16,7 +16,7 @@ public class Search {
     }
 
     public static List<Card> filterCards(Predicate<Card> criteria) {
-        return CardList.stream().filter(criteria).toList();
+        return CardSet.stream().filter(criteria).toList();
     }
 
     public static void searchWithChanceIn(int outOf) {

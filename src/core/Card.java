@@ -3,7 +3,6 @@ package core;
 import datafixers.Pair;
 import util.*;
 import values.CardClass;
-import values.CardSet;
 import values.CardType;
 import values.Rarity;
 
@@ -32,7 +31,7 @@ public class Card {
     /**
      * If a card is of a set listed below, it will never be downloaded.
      */
-    public static final Set<CardSet> SET_BLACKLIST = Set.of(CardSet.VANILLA, CardSet.LETTUCE);
+    public static final Set<values.CardSet> SET_BLACKLIST = Set.of(values.CardSet.VANILLA, values.CardSet.LETTUCE);
 
     private final CardClass cardClass;
     private final String name;
@@ -41,7 +40,7 @@ public class Card {
     private final String id;
     private final String artist;
     private final boolean collectible;
-    private final CardSet set;
+    private final values.CardSet set;
     private final Integer attack;
     private final Integer health;
     private final CardType type;
@@ -54,7 +53,7 @@ public class Card {
     /**
      * private constructor; use the Card.Builder instead
      */
-    private Card(CardClass cardClass, String name, String text, int cost, String id, String artist, boolean collectible, CardSet set, int attack, int health, CardType type, Rarity rarity, boolean elite) {
+    private Card(CardClass cardClass, String name, String text, int cost, String id, String artist, boolean collectible, values.CardSet set, int attack, int health, CardType type, Rarity rarity, boolean elite) {
         this.cardClass = cardClass;
         this.name = name;
         this.text = text;
@@ -81,7 +80,7 @@ public class Card {
 
     public boolean isBattlegroundGolden() {
         return this.id.contains("BaconUps") ||
-                (this.set == CardSet.BATTLEGROUNDS && this.id.endsWith("_G"));
+                (this.set == values.CardSet.BATTLEGROUNDS && this.id.endsWith("_G"));
     }
 
     public CardType getType() {
@@ -132,7 +131,7 @@ public class Card {
     @RequiresInitializedCardList
     public static Optional<Card> lookup(String id) {
         Card op = null;
-        for (Card c : CardList.list()) {
+        for (Card c : CardSet.get()) {
             if (NullStringUtil.equals(c.id, id))
                 op = c;
         }
@@ -158,7 +157,7 @@ public class Card {
 
 
     public boolean isBattlegrounds() {
-        return this.set == CardSet.BATTLEGROUNDS;
+        return this.set == values.CardSet.BATTLEGROUNDS;
     }
 
     public boolean isSoloHero() {
@@ -190,7 +189,7 @@ public class Card {
     public boolean isPuzzleLab() {
         boolean isSpeciallyCallingPuzzle = text != null && (text.contains("Start Mirror Puzzle") || text.contains("Start Lethal Puzzle") ||
                 text.contains("Start Board Clear Puzzle") || text.contains("Start Survival Puzzle"));
-        return this.getSet() == CardSet.BOOMSDAY && isSpeciallyCallingPuzzle && !this.hasArtist();
+        return this.getSet() == values.CardSet.BOOMSDAY && isSpeciallyCallingPuzzle && !this.hasArtist();
     }
 
 
@@ -293,7 +292,7 @@ public class Card {
         return id;
     }
 
-    public CardSet getSet() {
+    public values.CardSet getSet() {
         return set;
     }
 
@@ -340,7 +339,7 @@ public class Card {
         private String id;
         private String artist;
         private boolean collectible;
-        private CardSet set;
+        private values.CardSet set;
         private Integer attack;
         private Integer health;
         private CardType type;
@@ -359,7 +358,7 @@ public class Card {
             this.id = "";
             this.artist = "";
             this.collectible = false;
-            this.set = CardSet.INVALID;
+            this.set = values.CardSet.INVALID;
             this.attack = Integer.MAX_VALUE;
             this.health = Integer.MAX_VALUE;
             this.type = CardType.BLANK;
@@ -410,7 +409,7 @@ public class Card {
             return this;
         }
 
-        public Card.Builder set(CardSet entry) {
+        public Card.Builder set(values.CardSet entry) {
             this.set = entry;
             return this;
         }
@@ -469,7 +468,7 @@ public class Card {
                 case "attack" -> this.attack(Integer.parseInt(value));
                 case "health" -> this.health(Integer.parseInt(value));
                 case "collectible" -> this.collectible(Boolean.parseBoolean(value));
-                case "set" -> this.set(CardSet.valueOf(value));
+                case "set" -> this.set(values.CardSet.valueOf(value));
                 case "rarity" -> this.rarity(Rarity.valueOf(value));
                 case "type" -> this.type(CardType.valueOf(value));
                 case "elite" -> this.elite(Boolean.parseBoolean(value));
